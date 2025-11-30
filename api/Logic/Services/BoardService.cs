@@ -1,0 +1,119 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using AgileObjects.AgileMapper;
+using Logic.Dtos.Board;
+using Logic.Dtos.Email;
+using Logic.Interfaces;
+using Models.Entities;
+using Logic.Extensions;
+using Microsoft.Extensions.Logging;
+
+namespace Logic.Services;
+
+public class BoardService(
+    IGeoService geoService,
+    IGlobalConfigService globalConfigService,
+    IJourneyService journeyService,
+    IStopService stopService,
+    IAddressService addressService,
+    IEmailService emailService,
+    ILogger<BoardService> logger) : IBoardService
+{
+    public async Task Submit(JourneyDto journeyDto)
+    {
+        var journey = await journeyService.Save(new Journey
+        {
+            Description = journeyDto.Description,
+            Date = journeyDto.Date,
+            SubmissionDate = DateTimeOffset.Now,
+            Verified = false,
+            Email = journeyDto.Email,
+            Photos = journeyDto.Photos
+        });
+        
+        foreach (var journeyDtoStop in journeyDto.Stops.Where(x => string.IsNullOrEmpty(x.Address.AddressLine1)))
+        {
+            var line = journeyDtoStop.Address.GetAddressSingleLine(includeCountry: true);
+            
+            var result = (await geoService.MapLocation(line)).FirstOrDefault();
+            
+            // assign longitude and latitude if accuracy score is 100%
+            if (result is { AccuracyScore: 1 })
+            {
+                journeyDtoStop.Address.AddressLine1 = result.Address;
+                journeyDtoStop.Address.City = result.AddressComponents.City;
+                journeyDtoStop.Address.ZipCode = int.TryParse(result.AddressComponents.PostalCode, out var zipCode) ? zipCode : null;
+                journeyDtoStop.Address.State = result.AddressComponents.State;
+                journeyDtoStop.Address.Country = result.AddressComponents.County;
+                journeyDtoStop.Address.Longitude = result.Point.Longitude;
+                journeyDtoStop.Address.Latitude = result.Point.Latitude;
+            }
+            else
+            {
+                logger.LogInformation("Skipping {Address} since it has accuracy score of {Score}", line, result?.AccuracyScore);
+            }
+        }
+        
+        var addresses = (await addressService.SaveMany(journeyDto.Stops.Select(x => new Address
+        {
+            Name = x.Address.Name,
+            AddressLine1 = x.Address.AddressLine1,
+            AddressLine2 = x.Address.AddressLine2,
+            Country = x.Address.Country,
+            City = x.Address.City,
+            State = x.Address.State,
+            ZipCode = x.Address.ZipCode,
+            Latitude = x.Address.Latitude,
+            Longitude = x.Address.Longitude
+        }).ToArray())).ToList();
+
+        await stopService.SaveMany(journeyDto.Stops.Select((x, index) => new Stop
+        {
+            Description = x.Description,
+            AddressId = addresses[index].Id,
+            JourneyId = journey.Id,
+            Number = index
+        }).ToArray());
+
+        var globalConfig = await globalConfigService.GetAllGlobalConfig();
+        
+        var queryString = HttpUtility.ParseQueryString(string.Empty);
+
+        queryString.Add("id", journey.Id.ToString());
+        queryString.Add("email", journey.Email);
+
+        await emailService.SendEmailAsync(
+            globalConfig.WebsiteAdminEmail,
+            "Journey Submitted - Confirmation",
+            $"""
+                     Please confirm your submission.
+                     {new UriBuilder(globalConfig.WebsiteAdminEmail) { Path = "/board/confirm", Query = queryString.ToString() }}
+             """,
+            [journey.Email],
+            payload: new EmailEventPayload
+            {
+                JourneyId = journey.Id,
+            });
+    }
+
+    public async Task<List<JourneyDto>> GetJourneys(List<string> keywords)
+    {
+        return Mapper.Map(await journeyService.GetAllHelper(filterExprs: [x => x.Verified])).ToANew<List<JourneyDto>>();
+    }
+
+    public async Task Confirm(int journeyId, string email)
+    {
+        var journey = (await journeyService.GetAllHelper(filterExprs:[x => x.Id == journeyId, x => !x.Verified])).FirstOrDefault();
+
+        if (journey != null)
+        {
+            await journeyService.Update(journeyId, x =>
+            {
+                x.Verified = true;
+            });
+        }
+    }
+}

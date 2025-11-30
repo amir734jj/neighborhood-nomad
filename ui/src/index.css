@@ -1,0 +1,36 @@
+@import url("nprogress/nprogress.css");
+@import url("bootstrap/dist/css/bootstrap.min.css");
+@import url("leaflet/dist/leaflet.css");
+@import url('react-bootstrap-typeahead/css/Typeahead.bs5.min.css');
+@import url("react-datetime/css/react-datetime.css");
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+.material-symbols-outlined {
+    margin: 0;
+    padding: 0;
+    font-variation-settings: 'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 48
+}
+
+.pac-container {
+    background-color: #FFF;
+    z-index: 2001;
+    position: fixed;
+    display: inline-block;
+    float: left;
+}
+.modal{
+    z-index: 2000;
+}
+.modal-backdrop{
+    z-index: 1000;
+}
+
+.heading-color {
+    color: #ff6b6b;
+}

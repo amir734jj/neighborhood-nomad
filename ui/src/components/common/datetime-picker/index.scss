@@ -1,0 +1,23 @@
+.datetime-picker {
+  &_dark-mode {
+    .rdtPicker {
+      background-color: #3b3b3b;
+    }
+  }
+
+  &_light-mode {
+    .rdtPicker {
+      background-color: white;
+    }
+  }
+
+  &.disabled {
+    pointer-events: none;
+
+    input {
+      background: transparent;
+      box-shadow: none;
+      border: none;
+    }
+  }
+}

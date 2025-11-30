@@ -1,0 +1,18 @@
+@use '../../../styles/mixins';
+
+.footer {
+  display: none;
+
+  @include mixins.breakpoint(sm) {
+    display: flex;
+    width: 100%;
+  }
+
+  @include mixins.breakpoint(md) {
+    width: 75%;
+  }
+
+  @include mixins.breakpoint(lg) {
+    width: 80%;
+  }
+}

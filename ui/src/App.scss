@@ -1,0 +1,30 @@
+@use 'styles/mixins';
+
+.root-container {
+  flex-wrap: wrap;
+
+  @include mixins.breakpoint(md) {
+    flex-wrap: nowrap;
+  }
+}
+
+.side-container {
+  transition: width 0.3s;
+  flex: 1 1 auto;
+  height: 100%;
+
+  @include mixins.breakpoint(md) {
+    flex: 0 0 auto;
+  }
+}
+
+.main-container {
+}
+
+// Add min-vh-md-100 utility
+.min-vh-md-100 {
+
+  @include mixins.breakpoint(md) {
+    min-height: 100vh !important;
+  }
+}
