@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Logic.Dtos.Board;
+using Models.Entities;
 
 namespace Logic.Interfaces;
 
 public interface IBoardService
 {
-    public Task Submit(JourneyDto journeyDto);
+    public Task Submit(Journey dto);
     
-    public Task<List<JourneyDto>> GetJourneys(List<string> keywords);
+    public Task<List<Journey>> GetJourneys(List<string> keywords);
     
     public Task Confirm(int journeyId, string email);
 }

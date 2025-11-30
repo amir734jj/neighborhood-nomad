@@ -3,8 +3,6 @@ import React, {useEffect} from "react";
 import {OverlayTrigger, Tooltip} from "react-bootstrap";
 import {GoogleIcon} from "../google-icon";
 import {useColorMode, useIsDarkMode} from "../../../state";
-import store from "store2";
-import {STORE_COLOR_MODE} from "../../../constants";
 
 export const DarkMode = ({ className, style, doInitialSetup = false }) => {
   const {setColorMode, toggleColorMode } = useColorMode();
@@ -15,9 +13,7 @@ export const DarkMode = ({ className, style, doInitialSetup = false }) => {
 
   useEffect(() => {
     if (doInitialSetup) {
-      if (store.has(STORE_COLOR_MODE)) {
-        setColorMode(store.get(STORE_COLOR_MODE));
-      } else if (isDarkMode !== isSystemDarkMode) {
+      if (isDarkMode !== isSystemDarkMode) {
         setColorMode(isSystemDarkMode);
       }
     }

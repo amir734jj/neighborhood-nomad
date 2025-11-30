@@ -34,9 +34,9 @@ const App = () => {
                 <Row>
                   <Col sm={12}>
                     <Routes>
-                      <Route path={pages.about} element={<About/>} key="about"/>
-                      <Route path={pages.root} element={<Board/>} key="home"/>
                       {authInitialized ? <Fragment>
+                        <Route path={pages.about} element={<About/>} key="about"/>
+                        <Route path={pages.root} element={<Board/>} key="home"/>
                         {isLoggedIn ? <Fragment>
                           <Route path={pages.logout} element={<Logout/>} key="logout"/>
                           <Route path={pages.profile} element={<Profile/>} key="profile"/>
@@ -45,14 +45,13 @@ const App = () => {
                           <Route path={pages.resetPassword} element={<ResetPassword/>} key="reset-password"/>
                           <Route path={pages.configuration} element={<Configuration/>} key="configuration"/>
                           <Route path={pages.admin} element={<Admin/>} key="admin"/>
-                          <Route path={pages.any} element={<NotAuthorize/>} key="no-match"/>
                         </Fragment> : <Fragment>
                           <Route path={pages.login} element={<Login/>} key="login"/>
                           <Route path={pages.register} element={<Register/>} key="register"/>
                           <Route path={pages.forgotPasswordRequest} element={<ForgotPasswordRequest/>} key="forgot-password-request"/>
                           <Route path={pages.forgotPasswordSubmit} element={<ForgotPasswordSubmit/>} key="forgot-password-submit"/>
-                          <Route path={pages.any} element={<Board/>} key="no-match-board-again"/>
                         </Fragment>}
+                        <Route path={pages.any} element={<NotAuthorize/>} key="no-match"/>
                       </Fragment> : <Route path={pages.any} element={<Spinner/>} key="wait-until-load-completes"/> }
                     </Routes>
                   </Col>

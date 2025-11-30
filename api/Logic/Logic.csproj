@@ -10,14 +10,18 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="AgileObjects.AgileMapper" Version="1.8.1" />
       <PackageReference Include="Arex388.Geocodio" Version="2.0.4" />
       <PackageReference Include="AWSSDK.S3" Version="4.0.13.1" />
+      <PackageReference Include="FuzzySharp" Version="2.0.2" />
       <PackageReference Include="Hangfire.Core" Version="1.8.22" />
       <PackageReference Include="JsonSubTypes" Version="2.0.1" />
       <PackageReference Include="Mailjet.Api" Version="3.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Dtos\Board\" />
     </ItemGroup>
 
 </Project>

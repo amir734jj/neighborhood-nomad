@@ -25,8 +25,8 @@ const BasicNavbar = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Nav className="me-auto">
           { isLoggedIn ? <Fragment>
-            <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
             <RouterNavLink to={pages.journeys} name='Journeys' pathname={pathname} />
+            <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
           </Fragment> : null }
           <RouterNavLink to={pages.about} name='About' pathname={pathname} />
         </Nav>

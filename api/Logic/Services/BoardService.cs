@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using AgileObjects.AgileMapper;
-using Logic.Dtos.Board;
+using FuzzySharp;
 using Logic.Dtos.Email;
 using Logic.Interfaces;
 using Models.Entities;
 using Logic.Extensions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Logic.Services;
 
@@ -22,7 +22,7 @@ public class BoardService(
     IEmailService emailService,
     ILogger<BoardService> logger) : IBoardService
 {
-    public async Task Submit(JourneyDto journeyDto)
+    public async Task Submit(Journey journeyDto)
     {
         var journey = await journeyService.Save(new Journey
         {
@@ -34,7 +34,7 @@ public class BoardService(
             Photos = journeyDto.Photos
         });
         
-        foreach (var journeyDtoStop in journeyDto.Stops.Where(x => string.IsNullOrEmpty(x.Address.AddressLine1)))
+        foreach (var journeyDtoStop in journeyDto.Stops.Where(x => string.IsNullOrEmpty(x.Address!.AddressLine1)))
         {
             var line = journeyDtoStop.Address.GetAddressSingleLine(includeCountry: true);
             
@@ -43,7 +43,7 @@ public class BoardService(
             // assign longitude and latitude if accuracy score is 100%
             if (result is { AccuracyScore: 1 })
             {
-                journeyDtoStop.Address.AddressLine1 = result.Address;
+                journeyDtoStop.Address!.AddressLine1 = result.Address;
                 journeyDtoStop.Address.City = result.AddressComponents.City;
                 journeyDtoStop.Address.ZipCode = int.TryParse(result.AddressComponents.PostalCode, out var zipCode) ? zipCode : null;
                 journeyDtoStop.Address.State = result.AddressComponents.State;
@@ -59,7 +59,7 @@ public class BoardService(
         
         var addresses = (await addressService.SaveMany(journeyDto.Stops.Select(x => new Address
         {
-            Name = x.Address.Name,
+            Name = x.Address!.Name,
             AddressLine1 = x.Address.AddressLine1,
             AddressLine2 = x.Address.AddressLine2,
             Country = x.Address.Country,
@@ -99,9 +99,16 @@ public class BoardService(
             });
     }
 
-    public async Task<List<JourneyDto>> GetJourneys(List<string> keywords)
+    public async Task<List<Journey>> GetJourneys(List<string> keywords)
     {
-        return Mapper.Map(await journeyService.GetAllHelper(filterExprs: [x => x.Verified])).ToANew<List<JourneyDto>>();
+        if (keywords.Count == 0)
+        {
+            return (await journeyService.GetAllHelper(filterExprs: [x => x.Verified], orderByDesc: x => x.Id, maxResults: 20)).ToList();
+        }
+        
+        var journeys = await journeyService.GetAllHelper(filterExprs: [x => x.Verified]);
+
+        return FuzzySearch(journeys, keywords).ToList();
     }
 
     public async Task Confirm(int journeyId, string email)
@@ -115,5 +122,28 @@ public class BoardService(
                 x.Verified = true;
             });
         }
+    }
+    
+    private static int ComputeScore(Journey journey, List<string> keywords)
+    {
+        var text = JsonConvert.SerializeObject(new[] {
+            journey.Description,
+            journey.Email,
+        }.Concat(journey.Stops.SelectMany(x => new[] {x.Description, x.Address?.Name, x.Address?.AddressLine1, x.Address?.City, x.Address?.State })));
+
+        return keywords.Select(keyword => Fuzz.TokenSetRatio(keyword, text)).Prepend(0).Max();
+    }
+
+    private static IEnumerable<Journey> FuzzySearch(IEnumerable<Journey> journeys, List<string> keywords, int minScore = 50)
+    {
+        return journeys
+            .Select(p => new
+            {
+                Item = p,
+                Score = ComputeScore(p, keywords)
+            })
+            .Where(x => x.Score >= minScore)
+            .OrderByDescending(x => x.Score)
+            .Select(x => x.Item);
     }
 }

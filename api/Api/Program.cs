@@ -2,12 +2,15 @@ using System.Reflection;
 using Api.Extensions;
 using Hangfire;
 using Logic.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using Models.Entities;
 using Scrutor;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 5 * 1024 * 1024; // 5 MB
+});
 
 // This is needed to be able to store DateTimeOffset with zone other than UTC
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

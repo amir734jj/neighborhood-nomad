@@ -1,12 +1,12 @@
 using System.Text;
-using Logic.Dtos.Board;
+using Models.Entities;
 
 namespace Logic.Extensions;
 
 public static class AddressExtension
 {
     // W315N7755 WI-83, Hartland, WI 53029 USA
-    public static string GetAddressSingleLine(this AddressDto? address, bool includeCountry)
+    public static string GetAddressSingleLine(this Address? address, bool includeCountry)
     {
         // not a valid address
         if (address == null || string.IsNullOrEmpty(address.AddressLine1)) return string.Empty;

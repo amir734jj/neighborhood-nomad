@@ -1,7 +1,7 @@
-using Logic.Dtos.Board;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.Entities;
 
 namespace Api.Controllers;
 
@@ -10,7 +10,7 @@ namespace Api.Controllers;
 public class BoardController(IBoardService boardService) : Controller
 {
     [HttpGet]
-    [Route("")]
+    [Route("query")]
     public virtual async Task<IActionResult> GetAll([FromQuery]List<string> filters)
     {
         return Ok(await boardService.GetJourneys(filters));
@@ -18,7 +18,7 @@ public class BoardController(IBoardService boardService) : Controller
     
     [HttpPost]
     [Route("")]
-    public virtual async Task<IActionResult> Submit([FromBody] JourneyDto journey)
+    public virtual async Task<IActionResult> Submit([FromBody] Journey journey)
     {
         await boardService.Submit(journey);
         
