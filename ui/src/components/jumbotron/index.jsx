@@ -12,6 +12,9 @@ export const Jumbotron = () => {
           <h5 className="display-5 fw-bold">
             Neighborhood Nomad
           </h5>
+          <p>
+            The goal of this website is to share simple 1-day adventures with people. Not every trip needs a full itinerary — these days, everyone is busy and often just looking for something quick and fun. This website gives you easy ideas and inspiration for short, memorable experiences.
+          </p>
           <p className="fs-4">
             Powered by Cross Culture Innovations LLC
           </p>

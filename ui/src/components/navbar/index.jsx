@@ -6,7 +6,7 @@ import {useLocation} from "react-router-dom";
 import {NavDropdown} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faUserCircle} from "@fortawesome/free-solid-svg-icons";
-import React from "react";
+import React, {Fragment} from "react";
 import './style.scss';
 import {RouterNavDropDownItem, RouterNavLink} from "../common";
 import {pages} from "../../data/roles";
@@ -23,10 +23,13 @@ const BasicNavbar = () => {
           Neighborhood Nomad
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-        { isLoggedIn ?<Nav className="me-auto">
-          <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
-          <RouterNavLink to={pages.journeys} name='Journeys' pathname={pathname} />
-        </Nav> : null }
+        <Nav className="me-auto">
+          { isLoggedIn ? <Fragment>
+            <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
+            <RouterNavLink to={pages.journeys} name='Journeys' pathname={pathname} />
+          </Fragment> : null }
+          <RouterNavLink to={pages.about} name='About' pathname={pathname} />
+        </Nav>
         { isLoggedIn ? <Navbar.Collapse id="basic-navbar-nav">
           <Nav className='ms-auto'>
             <Nav.Item className="mx-2 nav-item d-flex align-items-center">
