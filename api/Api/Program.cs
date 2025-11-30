@@ -7,9 +7,16 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var portConfig = Environment.GetEnvironmentVariable("PORT");
+if (string.IsNullOrEmpty(portConfig) || !int.TryParse(portConfig, out var port))
+{
+    port = 5000;
+}
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 5 * 1024 * 1024; // 5 MB
+    options.ListenAnyIP(port);
 });
 
 // This is needed to be able to store DateTimeOffset with zone other than UTC
