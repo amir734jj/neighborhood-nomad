@@ -23,7 +23,7 @@ public static class ConnectionStringUtility
             SslMode = SslMode.Prefer,
             Pooling = true,
             // Hard limit
-            MaxPoolSize = 20,
+            MaxPoolSize = 5,
             Port = port,
             CommandTimeout = 0,
             Timeout = (int)TimeSpan.FromMinutes(1).TotalSeconds

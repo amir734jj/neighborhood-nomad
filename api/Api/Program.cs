@@ -4,6 +4,7 @@ using Hangfire;
 using Logic.Interfaces;
 using Scrutor;
 using Serilog;
+using Logic.JsonConverters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +41,11 @@ builder.Services
     .AddGeocodio()
     .AddResponseCompression()
     .AddEndpointsApiExplorer()
-    .AddMvc();
+    .AddMvc()
+    .AddNewtonsoftJson(opt =>
+    {
+        opt.SerializerSettings.Converters.Add(new GlobalConfigConverter(builder.Environment));
+    });
 
 builder.Services.Scan(scan => scan
     .FromAssemblies(Assembly.Load("Logic"))
@@ -50,7 +55,6 @@ builder.Services.Scan(scan => scan
     .WithTransientLifetime()); // 3. Set the lifetime for the services
 
 var app = builder.Build();
-
 
 var recurringJobManager =  app.Services.CreateScope().ServiceProvider.GetService<IRecurringJobManager>();
 foreach (var job in app.Services.CreateScope()
