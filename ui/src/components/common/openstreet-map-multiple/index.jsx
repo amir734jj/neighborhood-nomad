@@ -30,13 +30,12 @@ const MapUpdater = ({ latitude, longitude, isVisible }) => {
   return null;
 };
 
-export const OpenStreetMapMultiple = ({ companyLocationData = {}, locationData = [], style = {}, zoom = 12, scrollWheelZoom = false }) => {
-
-  const centeredPosition = calculateGeographicCenter(locationData, companyLocationData);
+export const OpenStreetMapMultiple = ({ locationData = [], style = {}, zoom = 12, scrollWheelZoom = false }) => {
+  const centeredPosition = calculateGeographicCenter(locationData);
   const [center, setCenter] = useState(centeredPosition);
   useEffect(() => {
-    setCenter(calculateGeographicCenter(locationData, companyLocationData));
-  }, [locationData, companyLocationData]);
+    setCenter(calculateGeographicCenter(locationData));
+  }, [locationData]);
 
   const { inView, ref } = useInView();
 
@@ -50,15 +49,11 @@ export const OpenStreetMapMultiple = ({ companyLocationData = {}, locationData =
         {locationData.map((pin, index) => (
           <Fragment key={index}>
             <Marker position={[pin.position.lat, pin.position.lng]} icon={customIcon}>
-              <Popup>{pin.infoWindowContent}</Popup>
+              <Popup>{pin.marker}</Popup>
             </Marker>
             <MapUpdater latitude={pin.position.lat} longitude={pin.position.lng} isVisible={inView} />
           </Fragment>
         ))}
-        <Marker position={[companyLocationData.position.lat, companyLocationData.position.lng]} icon={customIcon}>
-          <Popup>{companyLocationData.marker}</Popup>
-        </Marker>
-        <MapUpdater latitude={companyLocationData.position.lat} longitude={companyLocationData.position.lng} isVisible={inView} />
       </MapContainer>
     </div>
   );

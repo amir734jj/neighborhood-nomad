@@ -126,12 +126,16 @@ public class BoardService(
     
     private static int ComputeScore(Journey journey, List<string> keywords)
     {
-        var text = JsonConvert.SerializeObject(new[] {
+        var text = string.Join(' ', new[]
+        {
             journey.Description,
             journey.Email,
-        }.Concat(journey.Stops.SelectMany(x => new[] {x.Description, x.Address?.Name, x.Address?.AddressLine1, x.Address?.City, x.Address?.State })));
+        }.Concat(journey.Stops.SelectMany(x => new[]
+        {
+            x.Description, x.Address?.Name, x.Address?.AddressLine1, x.Address?.City, x.Address?.State
+        })));
 
-        return keywords.Select(keyword => Fuzz.TokenSetRatio(keyword, text)).Prepend(0).Max();
+        return keywords.Select(keyword => Fuzz.TokenSetRatio(text.ToLower(), keyword.ToLower())).Prepend(0).Max();
     }
 
     private static IEnumerable<Journey> FuzzySearch(IEnumerable<Journey> journeys, List<string> keywords, int minScore = 50)

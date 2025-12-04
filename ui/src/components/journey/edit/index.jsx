@@ -9,11 +9,14 @@ import {getCompiledPath, pages} from "../../../data";
 export const EditJourney = () => {
   const {journeyId} = useParams();
   const [journey, setJourney] = useState(null);
+  const [fetchFailed, setFetchFailed] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     getJourneyById(journeyId).then(({ data }) => {
       setJourney(data);
+    }).catch((err) => {
+      setFetchFailed(err);
     });
   }, [journeyId]);
 
@@ -25,6 +28,11 @@ export const EditJourney = () => {
     await deleteJourney(journeyId);
     navigate(getCompiledPath(pages.journeys));
   };
+
+  if (fetchFailed) {
+    navigate(pages.root);
+    return null;
+  }
 
   if (!journey) {
     return <Spinner />;

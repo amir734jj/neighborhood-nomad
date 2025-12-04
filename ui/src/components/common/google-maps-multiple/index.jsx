@@ -4,16 +4,17 @@ import React, {useState, useEffect, Fragment} from "react";
 import {Spinner} from "../spinner";
 import {calculateGeographicCenter} from "../../../utilities";
 import chroma from "chroma-js";
+import {MarkerWithInfoWindow} from "../marker-with-info-window/index.jsx";
 
-export const GoogleMapsMultiple = ({ companyLocationData = {}, locationData = [], style = {}, zoom: defaultZoom = 12 }) => {
+export const GoogleMapsMultiple = ({ locationData = [], style = {}, zoom: defaultZoom = 12 }) => {
   const { publicGlobalConfig: { googleMapsAutoComplete = '' } } = useGlobalConfig();
-  const getCenteredPosition = () => calculateGeographicCenter(locationData) || companyLocationData.position;
+  const getCenteredPosition = () => calculateGeographicCenter(locationData);
   const [center, setCenter] = useState(getCenteredPosition());
   const colors = chroma.scale(['crimson', 'darkblue']).mode('lch').colors(locationData.length);
 
   useEffect(() => {
     setCenter(getCenteredPosition());
-  }, [locationData, companyLocationData]);
+  }, [locationData]);
 
   if (!googleMapsAutoComplete) {
     return <Spinner />;
@@ -31,10 +32,6 @@ export const GoogleMapsMultiple = ({ companyLocationData = {}, locationData = []
           setCenter({lat: map.getCenter().lat(), lng: map.getCenter().lng()});
         }}
       >
-        <AdvancedMarker position={companyLocationData.position}>
-          <Pin>
-          </Pin>
-        </AdvancedMarker>
         {locationData.map((pin, index) => (
           <Fragment key={index}>
             <AdvancedMarker position={pin.position}>
@@ -44,6 +41,17 @@ export const GoogleMapsMultiple = ({ companyLocationData = {}, locationData = []
                 glyphColor="#FFFFFF">
               </Pin>
             </AdvancedMarker>
+            <MarkerWithInfoWindow
+              position={pin.position}
+              infoWindowContent={pin.infoWindowContent}>
+              <div style={{
+                fontWeight: "bold",
+                fontSize: "0.8rem",
+                color: colors[index],
+              }}>
+                {pin.marker}
+              </div>
+            </MarkerWithInfoWindow>
           </Fragment>
         ))}
       </Map>

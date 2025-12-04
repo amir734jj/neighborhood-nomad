@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import {AddJourney} from "../components/journey/add";
-import {SearchJourney} from "../components/journey/search/index.jsx";
+import {SearchJourney} from "../components/journey/search";
 
 const Board = () => {
   return (

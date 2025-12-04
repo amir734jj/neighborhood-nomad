@@ -1,11 +1,12 @@
-import React, {Fragment, useState} from "react";
-import {Form} from "react-bootstrap";
-import {queryJourney} from "../../../api/index.js";
+import React, {Fragment, useCallback, useEffect, useState} from "react";
+import {Col, Form, Row} from "react-bootstrap";
+import {queryJourney} from "../../../api";
 import _ from "lodash";
-import {MapMultiple} from "../../common/index.js";
+import {MapMultiple} from "../../common";
+import {useWindowSize} from "usehooks-ts";
 
 export const SearchJourney = () => {
-  const [keywords, setKeywords] = useState(null);
+  const {height} = useWindowSize();
   const [journeys, setJourneys] = useState([]);
 
   const filterToKeywords = filter => {
@@ -19,17 +20,39 @@ export const SearchJourney = () => {
       .value();
   };
 
+  const searchJourneys = useCallback((input) => {
+    queryJourney(filterToKeywords(input)).then(({ data }) => {
+      setJourneys(data);
+    });
+  }, [filterToKeywords]);
+
+  useEffect(() => {
+    searchJourneys('');
+  }, []);
+
   return <Fragment>
-    <Form.Label column="md" className="mb-2 text-muted">Keywords</Form.Label>
-    <Form.Control
-      type="text"
-      onChange={e => {
-        setKeywords(e.target.value);
-        queryJourney(filterToKeywords(e.target.value)).then(({ data }) => {
-          setJourneys(data);
-        });
-      }}
-    />
-    <MapMultiple />
+    <Row>
+      <Col xs={12} md={8}>
+        <MapMultiple
+          style={{ height: height * 0.75 }}
+          locationData={_.flatten(journeys.map(j => j.stops.map(s => ({
+            marker: s.address.name,
+            infoWindowContent: <p>{s.description}</p>,
+            position: {
+              lat: s.address.latitude,
+              lng: s.address.longitude,
+            }
+          }))))} />
+      </Col>
+      <Col xs={12} md={4}>
+        <Form.Label column="md" className="mb-2 text-muted">Keywords</Form.Label>
+        <Form.Control
+          type="text"
+          onChange={e => {
+            searchJourneys(e.target.value);
+          }}
+        />
+      </Col>
+    </Row>
   </Fragment>;
 };

@@ -1,5 +1,10 @@
 import _ from "lodash";
 
+const centeredPoint = {
+  lat: 0,
+  lng: 0,
+};
+
 /**
  * Calculates the geographic center point from an array of locations
  * @param {Array} locations - Array of location objects with position{lat,lng}
@@ -8,7 +13,7 @@ import _ from "lodash";
 export function calculateGeographicCenter(locations) {
   // Validate input
   if (!_.isArray(locations)) {
-    return null;
+    return centeredPoint;
   }
 
   // Filter out invalid locations
@@ -23,7 +28,7 @@ export function calculateGeographicCenter(locations) {
 
   // Handle cases with no valid locations
   if (validLocations.length === 0) {
-    return null;
+    return centeredPoint;
   }
 
   // If only one location, return it directly

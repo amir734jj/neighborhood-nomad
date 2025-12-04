@@ -23,29 +23,31 @@ const BasicNavbar = () => {
           Neighborhood Nomad
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-        <Nav className="me-auto">
-          { isLoggedIn ? <Fragment>
-            <RouterNavLink to={pages.journeys} name='Journeys' pathname={pathname} />
-            <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
-          </Fragment> : null }
-          <RouterNavLink to={pages.about} name='About' pathname={pathname} />
-        </Nav>
-        { isLoggedIn ? <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className='ms-auto'>
-            <Nav.Item className="mx-2 nav-item d-flex align-items-center">
-              { `Hello${authContext.auth?.name ? `, ${authContext.auth?.name}` : ", user" }` }
-            </Nav.Item>
-            <NavDropdown
-              title={<FontAwesomeIcon icon={faUserCircle} size='2xl'/>}
-              id="basic-nav-dropdown"
-              align="end"
-              className='mx-2'
-            >
-              <RouterNavDropDownItem to={pages.profile} name='Profile' pathname={pathname} />
-              <RouterNavDropDownItem to={pages.logout} name='Logout' pathname={pathname} />
-            </NavDropdown>
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className='me-auto'>
+            { isLoggedIn ? <Fragment>
+              <RouterNavLink to={pages.journeys} name='Journeys' pathname={pathname} />
+              <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
+            </Fragment> : null }
+            <RouterNavLink to={pages.about} name='About' pathname={pathname} />
           </Nav>
-        </Navbar.Collapse> : null}
+          <Nav className='d-flex'>
+            { isLoggedIn ? <Fragment>
+              <Nav.Item className="mx-2 nav-item d-flex align-items-center">
+                { `Hello${authContext.auth?.name ? `, ${authContext.auth?.name}` : ", user" }` }
+              </Nav.Item>
+              <NavDropdown
+                title={<FontAwesomeIcon icon={faUserCircle} size='2xl'/>}
+                id="basic-nav-dropdown"
+                align="end"
+                className='mx-2'
+              >
+                <RouterNavDropDownItem to={pages.profile} name='Profile' pathname={pathname} />
+                <RouterNavDropDownItem to={pages.logout} name='Logout' pathname={pathname} />
+              </NavDropdown>
+            </Fragment>: null }
+          </Nav>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
   );
