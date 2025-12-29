@@ -14,8 +14,7 @@ import Profile from "./components/profile";
 import {ResetPassword} from "./components/account/reset-password";
 import Configuration from "./pages/Configuration.jsx";
 import {Admin} from "./components/admin";
-import {EditJourney, ListJourneys} from "./components/journey/index.js";
-import {ThemeSelector} from "./components/common/theme-selector/index.jsx";
+import {EditJourney, ListJourneys, ViewJourney} from "./components/journey";
 
 const App = () => {
   const authContext = useAuthStore();
@@ -37,11 +36,13 @@ const App = () => {
                       {authInitialized ? <Fragment>
                         <Route path={pages.about} element={<About/>} key="about"/>
                         <Route path={pages.root} element={<Board/>} key="home"/>
+                        <Route path={pages.journey.byId.view} element={<ViewJourney/>} key="home"/>
+
                         {isLoggedIn ? <Fragment>
                           <Route path={pages.logout} element={<Logout/>} key="logout"/>
                           <Route path={pages.profile} element={<Profile/>} key="profile"/>
-                          <Route path={pages.journeyById} element={<EditJourney/>} key="edit-journey"/>
-                          <Route path={pages.journeys} element={<ListJourneys/>} key="list-journeys"/>
+                          <Route path={pages.journey.byId.edit} element={<EditJourney/>} key="edit-journey"/>
+                          <Route path={pages.journey.root} element={<ListJourneys/>} key="list-journeys"/>
                           <Route path={pages.resetPassword} element={<ResetPassword/>} key="reset-password"/>
                           <Route path={pages.configuration} element={<Configuration/>} key="configuration"/>
                           <Route path={pages.admin} element={<Admin/>} key="admin"/>

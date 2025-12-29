@@ -4,9 +4,18 @@ import {queryJourney} from "../../../api";
 import _ from "lodash";
 import {MapMultiple} from "../../common";
 import {useWindowSize} from "usehooks-ts";
+import {useGeolocation} from "../../../utilities";
+
+const milwaukeeCoordinates = {
+  longitude: 87.91,
+  latitude: 43.04
+};
 
 export const SearchJourney = () => {
   const {height} = useWindowSize();
+  const geolocation = useGeolocation();
+  const latitude = geolocation.latitude ?? milwaukeeCoordinates.latitude;
+  const longitude = geolocation.longitude ?? milwaukeeCoordinates.longitude;
   const [journeys, setJourneys] = useState([]);
 
   const filterToKeywords = filter => {
@@ -35,6 +44,8 @@ export const SearchJourney = () => {
       <Col xs={12} md={8}>
         <MapMultiple
           style={{ height: height * 0.75 }}
+          defaultCenter={{ lat: latitude, lng: longitude }}
+          userLocation={latitude && longitude ? { lat: latitude, lng: longitude } : null}
           locationData={_.flatten(journeys.map(j => j.stops.map(s => ({
             marker: s.address.name,
             infoWindowContent: <p>{s.description}</p>,

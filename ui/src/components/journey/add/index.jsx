@@ -10,7 +10,7 @@ export const AddJourney = () => {
 
   const onSubmit = async formValues => {
     const {data: journey} = await submitJourney(formValues);
-    navigate(getCompiledPath(pages.journeyById, {journeyId: journey.id}));
+    navigate(getCompiledPath(pages.journey.byId.view, {journeyId: journey.id}));
   };
 
   return (

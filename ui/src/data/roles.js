@@ -12,8 +12,13 @@ export const pages = {
   admin: "/admin",
   configuration: "/configuration",
   about: "/about",
-  journeys: "/journey",
-  journeyById: "/journey/:journeyId",
+  journey: {
+    root: "/journey",
+    byId: {
+      view: "/journey/:journeyId",
+      edit: "/journey/:journeyId/edit",
+    }
+  },
   root: "/",
   any: "*",
 };

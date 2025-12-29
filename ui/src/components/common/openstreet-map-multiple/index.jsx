@@ -30,12 +30,16 @@ const MapUpdater = ({ latitude, longitude, isVisible }) => {
   return null;
 };
 
-export const OpenStreetMapMultiple = ({ locationData = [], style = {}, zoom = 12, scrollWheelZoom = false }) => {
+export const OpenStreetMapMultiple = ({ defaultCenter = null, locationData = [], style = {}, zoom = 12, scrollWheelZoom = false }) => {
   const centeredPosition = calculateGeographicCenter(locationData);
   const [center, setCenter] = useState(centeredPosition);
   useEffect(() => {
-    setCenter(calculateGeographicCenter(locationData));
-  }, [locationData]);
+    if (!locationData.length && defaultCenter) {
+      setCenter(defaultCenter);
+    } else {
+      setCenter(calculateGeographicCenter(locationData));
+    }
+  }, [locationData, defaultCenter]);
 
   const { inView, ref } = useInView();
 

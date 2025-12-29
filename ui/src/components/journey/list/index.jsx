@@ -27,7 +27,7 @@ export const ListJourneys = () => {
     <ul>
       {journeys.map(journey => (
         <li key={journey.id}>
-          <Link to={getCompiledPath(pages.journeyById, {journeyId: journey.id})}>
+          <Link to={getCompiledPath(pages.journey.byId.view, {journeyId: journey.id})}>
             {journey.description} @ {formatDate(journey.date)} by {journey.email}
           </Link>
         </li>

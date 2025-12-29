@@ -6,15 +6,19 @@ import {calculateGeographicCenter} from "../../../utilities";
 import chroma from "chroma-js";
 import {MarkerWithInfoWindow} from "../marker-with-info-window/index.jsx";
 
-export const GoogleMapsMultiple = ({ locationData = [], style = {}, zoom: defaultZoom = 12 }) => {
+export const GoogleMapsMultiple = ({ defaultCenter = null, locationData = [], style = {}, zoom: defaultZoom = 12 }) => {
   const { publicGlobalConfig: { googleMapsAutoComplete = '' } } = useGlobalConfig();
   const getCenteredPosition = () => calculateGeographicCenter(locationData);
   const [center, setCenter] = useState(getCenteredPosition());
   const colors = chroma.scale(['crimson', 'darkblue']).mode('lch').colors(locationData.length);
 
   useEffect(() => {
-    setCenter(getCenteredPosition());
-  }, [locationData]);
+    if (!locationData.length && defaultCenter) {
+      setCenter(defaultCenter);
+    } else {
+      setCenter(getCenteredPosition());
+    }
+  }, [locationData, defaultCenter]);
 
   if (!googleMapsAutoComplete) {
     return <Spinner />;

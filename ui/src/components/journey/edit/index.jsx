@@ -26,7 +26,7 @@ export const EditJourney = () => {
 
   const onDelete = async () => {
     await deleteJourney(journeyId);
-    navigate(getCompiledPath(pages.journeys));
+    navigate(getCompiledPath(pages.journey.root));
   };
 
   if (fetchFailed) {

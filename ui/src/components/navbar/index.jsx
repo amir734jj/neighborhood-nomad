@@ -26,7 +26,7 @@ const BasicNavbar = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className='me-auto'>
             { isLoggedIn ? <Fragment>
-              <RouterNavLink to={pages.journeys} name='Journeys' pathname={pathname} />
+              <RouterNavLink to={pages.journey.root} name='Journeys' pathname={pathname} />
               <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
             </Fragment> : null }
             <RouterNavLink to={pages.about} name='About' pathname={pathname} />
