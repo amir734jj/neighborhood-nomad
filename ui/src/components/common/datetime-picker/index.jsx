@@ -5,6 +5,7 @@ import {useColorMode} from "../../../state";
 import classNames from "classnames";
 import "./index.scss";
 import {DateTime} from "luxon";
+import {FormControl} from "react-bootstrap";
 
 // Convert moment.js date to regular date
 const normalizeMomentJsDate = (value, useEndOfDay) => {
@@ -24,7 +25,7 @@ const normalizeMomentJsDate = (value, useEndOfDay) => {
 
 const DATE_FORMAT = "MM/dd/yyyy";
 
-export const DatetimePicker = ({ onChange = _.noop, useEndOfDay = false, defaultValue = null, timePicker = false, datePicker = true, isInvalid = false, value = null, isValidDate = (_) => true, disabled = false, highlightedDays = [] }) => {
+export const DatetimePicker = ({ readOnly = false, onChange = _.noop, useEndOfDay = false, defaultValue = null, timePicker = false, datePicker = true, isInvalid = false, value = null, isValidDate = (_) => true, disabled = false, highlightedDays = [] }) => {
   const { colorMode } = useColorMode();
 
   const [currentValue, setCurrentValue] = useState('');
@@ -51,6 +52,10 @@ export const DatetimePicker = ({ onChange = _.noop, useEndOfDay = false, default
       }
     }
   }, [value, useEndOfDay]);
+
+  if (readOnly) {
+    return <FormControl value={currentValue} readOnly={true} />;
+  }
 
   return (
     <ReactDateTimePicker

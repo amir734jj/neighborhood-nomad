@@ -8,6 +8,7 @@ using Logic.Dtos.Email;
 using Logic.Interfaces;
 using Models.Entities;
 using Logic.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -20,16 +21,19 @@ public class BoardService(
     IStopService stopService,
     IAddressService addressService,
     IEmailService emailService,
+    IHttpContextAccessor httpContextAccessor,
     ILogger<BoardService> logger) : IBoardService
 {
     public async Task Submit(Journey journeyDto)
     {
+        var user = await httpContextAccessor.HttpContext.GetUser();
+        
         var journey = await journeyService.Save(new Journey
         {
             Description = journeyDto.Description,
             Date = journeyDto.Date,
             SubmissionDate = DateTimeOffset.Now,
-            Verified = false,
+            Verified = user != null,
             Email = journeyDto.Email.ToLower(),
             Photos = journeyDto.Photos
         });
@@ -78,25 +82,28 @@ public class BoardService(
             Number = index
         }).ToArray());
 
-        var globalConfig = await globalConfigService.GetAllGlobalConfig();
+        if (user == null)
+        {
+            var globalConfig = await globalConfigService.GetAllGlobalConfig();
         
-        var queryString = HttpUtility.ParseQueryString(string.Empty);
+            var queryString = HttpUtility.ParseQueryString(string.Empty);
 
-        queryString.Add("id", journey.Id.ToString());
-        queryString.Add("email", journey.Email);
+            queryString.Add("id", journey.Id.ToString());
+            queryString.Add("email", journey.Email);
 
-        await emailService.SendEmailAsync(
-            globalConfig.WebsiteAdminEmail,
-            "Journey Submitted - Confirmation",
-            $"""
-                     Please confirm your submission.
-                     {new UriBuilder(globalConfig.WebsiteAdminEmail) { Path = "/board/confirm", Query = queryString.ToString() }}
-             """,
-            [journey.Email],
-            payload: new EmailEventPayload
-            {
-                JourneyId = journey.Id,
-            });
+            await emailService.SendEmailAsync(
+                globalConfig.WebsiteAdminEmail,
+                "Journey Submitted - Confirmation",
+                $"""
+                         Please confirm your submission.
+                         {new UriBuilder(globalConfig.WebsiteAdminEmail) { Path = "/board/confirm", Query = queryString.ToString() }}
+                 """,
+                [journey.Email],
+                payload: new EmailEventPayload
+                {
+                    JourneyId = journey.Id,
+                });
+        }
     }
 
     public async Task<List<Journey>> GetJourneys(List<string> keywords)

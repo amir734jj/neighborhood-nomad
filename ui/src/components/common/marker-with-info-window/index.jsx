@@ -3,7 +3,6 @@ import {Fragment, useCallback, useState} from "react";
 
 export const MarkerWithInfoWindow = ({position, infoWindowContent, children}) => {
   const [markerRef, marker] = useAdvancedMarkerRef();
-
   const [infoWindowShown, setInfoWindowShown] = useState(false);
 
   const handleMarkerClick = useCallback(
@@ -15,14 +14,19 @@ export const MarkerWithInfoWindow = ({position, infoWindowContent, children}) =>
 
   return (
     <Fragment>
-      <AdvancedMarker
+      { children ? <AdvancedMarker
         ref={markerRef}
         position={position}
         anchorPoint={AdvancedMarkerAnchorPoint.TOP_CENTER}
         onClick={handleMarkerClick}
       >
         {children}
-      </AdvancedMarker>
+      </AdvancedMarker> : <AdvancedMarker
+        ref={markerRef}
+        position={position}
+        anchorPoint={AdvancedMarkerAnchorPoint.TOP_CENTER}
+        onClick={handleMarkerClick}
+      /> }
       {infoWindowShown && (
         <InfoWindow anchor={marker} onClose={handleClose}>
           {infoWindowContent}

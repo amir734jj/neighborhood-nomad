@@ -11,6 +11,7 @@ export const GoogleMapsMultiple = ({ defaultCenter = null, locationData = [], st
   const getCenteredPosition = () => calculateGeographicCenter(locationData);
   const [center, setCenter] = useState(getCenteredPosition());
   const colors = chroma.scale(['crimson', 'darkblue']).mode('lch').colors(locationData.length);
+  const [zoomValue, setZoomValue] = useState(defaultZoom);
 
   useEffect(() => {
     if (!locationData.length && defaultCenter) {
@@ -31,9 +32,13 @@ export const GoogleMapsMultiple = ({ defaultCenter = null, locationData = [], st
         defaultZoom={defaultZoom}
         mapId="roadmap"
         style={style}
+        zoom={zoomValue}
         zoomControl={true}
         onCenterChanged={({ map }) => {
           setCenter({lat: map.getCenter().lat(), lng: map.getCenter().lng()});
+        }}
+        onZoomChanged={({ detail: { zoom }}) => {
+          setZoomValue(zoom);
         }}
       >
         {locationData.map((pin, index) => (
@@ -48,13 +53,13 @@ export const GoogleMapsMultiple = ({ defaultCenter = null, locationData = [], st
             <MarkerWithInfoWindow
               position={pin.position}
               infoWindowContent={pin.infoWindowContent}>
-              <div style={{
+              { zoomValue >= 15 ? <div style={{
                 fontWeight: "bold",
                 fontSize: "0.8rem",
                 color: colors[index],
               }}>
                 {pin.marker}
-              </div>
+              </div> : "" }
             </MarkerWithInfoWindow>
           </Fragment>
         ))}

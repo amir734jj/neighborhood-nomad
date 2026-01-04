@@ -89,7 +89,7 @@ export const getEmptyJourney = () => ({
   photos: []
 });
 
-export const JourneyForm = ({ renderSubmit, defaultValues }) => {
+export const JourneyForm = ({ renderSubmit, defaultValues, readOnlyValues }) => {
   const {
     watch: formWatch,
     register: formRegister,
@@ -127,16 +127,16 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
       const newTypes = {...prev};
       delete newTypes[index];
       // Reindex remaining stops
-      const reindexed = {};
+      const reIndexed = {};
       Object.keys(newTypes).forEach(key => {
         const numKey = parseInt(key);
         if (numKey > index) {
-          reindexed[numKey - 1] = newTypes[key];
+          reIndexed[numKey - 1] = newTypes[key];
         } else {
-          reindexed[key] = newTypes[key];
+          reIndexed[key] = newTypes[key];
         }
       });
-      return reindexed;
+      return reIndexed;
     });
   };
 
@@ -210,6 +210,7 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
         <Form.Label column="md" className="mb-2 text-muted">Email</Form.Label>
         <Form.Control
           type="email"
+          readOnly={readOnlyValues.includes("email")}
           isInvalid={!!errors.email}
           className={classNames("form-control", {
             "is-invalid": errors.email,
@@ -230,6 +231,7 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
       <FormGroup className="mb-3" controlId="date">
         <Form.Label column="md" className="mb-2 text-muted">Date</Form.Label>
         <DatetimePicker
+          readOnly={readOnlyValues.includes("date")}
           isInvalid={!!errors.date}
           value={formValues.date}
           onChange={(dt) => {

@@ -17,6 +17,7 @@ export const AddJourney = () => {
 
   return (
     <JourneyForm
+      readOnlyValues={authContext.auth ? ['email'] : []}
       defaultValues={Object.assign({}, getEmptyJourney(), {
         email: authContext.auth?.email || '',
       })}
