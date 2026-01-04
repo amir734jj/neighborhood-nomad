@@ -89,7 +89,7 @@ export const getEmptyJourney = () => ({
   photos: []
 });
 
-export const JourneyForm = ({ renderSubmit, defaultValues, readOnlyValues }) => {
+export const JourneyForm = ({ renderSubmit, defaultValues, readOnlyValues = [] }) => {
   const {
     watch: formWatch,
     register: formRegister,
