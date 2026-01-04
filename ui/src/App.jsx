@@ -27,7 +27,7 @@ const App = () => {
       <GoogleMapApiLoader>
         <Fragment>
           <Header/>
-          <Container fluid className='ps-0 pe-0'>
+          <Container fluid className='ps-0 pe-0 mb-5'>
             <div className='mx-0 d-flex root-container min-vh-md-100'>
               <Container className='main-container' fluid>
                 <Row>

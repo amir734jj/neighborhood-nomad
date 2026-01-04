@@ -66,7 +66,7 @@ const ProfileForm = (arg) => {
         {errors.email ? <Form.Control.Feedback type="invalid">{errors.email.message}</Form.Control.Feedback> : null}
       </FormGroup>
       <FormGroup className='mb-3' controlId="role">
-        <Form.Label>Employee Role</Form.Label>
+        <Form.Label>Role</Form.Label>
         <Form.Control
           isInvalid={!!errors.role}
           readOnly={true}

@@ -53,7 +53,10 @@ export const OpenStreetMapMultiple = ({ defaultCenter = null, locationData = [],
         {locationData.map((pin, index) => (
           <Fragment key={index}>
             <Marker position={[pin.position.lat, pin.position.lng]} icon={customIcon}>
-              <Popup>{pin.marker}</Popup>
+              <Popup>
+                {pin.marker}
+                {pin.infoWindowContent}
+              </Popup>
             </Marker>
             <MapUpdater latitude={pin.position.lat} longitude={pin.position.lng} isVisible={inView} />
           </Fragment>
