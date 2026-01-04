@@ -10,6 +10,7 @@ public class JourneyMapping : IEntityTypeConfiguration<Journey>
     {
         entity.HasMany(x => x.Stops)
             .WithOne(x => x.Journey)
-            .HasForeignKey(x => x.JourneyId);
+            .HasForeignKey(x => x.JourneyId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

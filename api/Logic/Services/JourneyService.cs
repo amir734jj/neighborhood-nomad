@@ -39,6 +39,7 @@ public class JourneyService(IEfRepository repository, IStopService stopService) 
             // Apply additions
             if (entityStop == null)
             {
+                dtoStop.JourneyId = entity.Id;
                 entityStop = await stopService.Save(dtoStop);
             }
             // Apply updates

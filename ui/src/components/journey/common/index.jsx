@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { yupExt as yup } from "../../../utilities";
-import { Form, FormGroup } from "react-bootstrap";
+import {Button, Form, FormGroup} from "react-bootstrap";
 import {
   AddressAutoComplete,
   DatetimePicker,
   LoadingSimpleButton,
-  FormFeedback,
   SimpleButton,
-  GoogleIcon, FileUpload, FetchImage,
+  GoogleIcon, FileUpload,
 } from "../..//common";
 import classNames from "classnames";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -28,7 +27,8 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import _ from "lodash";
 import {DateTime} from "luxon";
-import {downloadFile, uploadFile} from "../../../api/index.js";
+import {downloadFile, uploadFile} from "../../../api";
+import {ADDRESS_AUTOCOMPLETE_TYPES} from "../../../constants";
 
 const addressSchema = yup.object({
   name: yup.string().required("Establishment name is required"),
@@ -122,8 +122,42 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
     name: "stops",
   });
 
+  const handleAppendStop = () => {
+    const newIndex = stopFields.length;
+    appendStop(emptyStop());
+    setAddressTypes(prev => ({
+      ...prev,
+      [newIndex]: ADDRESS_AUTOCOMPLETE_TYPES.establishment
+    }));
+  };
+
+  const handleRemoveStop = (index) => {
+    removeStop(index);
+    setAddressTypes(prev => {
+      const newTypes = {...prev};
+      delete newTypes[index];
+      // Reindex remaining stops
+      const reindexed = {};
+      Object.keys(newTypes).forEach(key => {
+        const numKey = parseInt(key);
+        if (numKey > index) {
+          reindexed[numKey - 1] = newTypes[key];
+        } else {
+          reindexed[key] = newTypes[key];
+        }
+      });
+      return reindexed;
+    });
+  };
+
   const [fileToGuidMap, setFileToGuidMap] = useState({});
   const [defaultPhotos, setDefaultPhotos] = useState([]);
+  const [addressTypes, setAddressTypes] = useState(
+    stopFields.reduce((acc, field, index) => {
+      acc[index] = ADDRESS_AUTOCOMPLETE_TYPES.establishment;
+      return acc;
+    }, {})
+  );
 
   useEffect(() => {
     const callback = async () => {
@@ -206,7 +240,7 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
         <Form.Label column="md" className="mb-2 text-muted">Date</Form.Label>
         <DatetimePicker
           isInvalid={!!errors.date}
-          value={undefined}
+          value={formValues.date}
           onChange={(dt) => {
             setValue("date", dt ? dt.toISOString() : "");
           }}
@@ -292,12 +326,27 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
                       ) : null}
                     </div>
                     <FormGroup className="mb-3" controlId={`stops.${index}.address.name`}>
-                      <Form.Label column="md" className="mb-2 text-muted">Address</Form.Label>
+                      <Form.Label column="md" className="mb-2 text-muted d-flex justify-content-between align-items-center">
+                        <span>Address</span>
+                        <Button 
+                          size="sm" 
+                          variant={addressTypes[index] === ADDRESS_AUTOCOMPLETE_TYPES.establishment ? "primary" : "secondary"}
+                          onClick={() => {
+                            setAddressTypes(prev => ({
+                              ...prev,
+                              [index]: prev[index] === ADDRESS_AUTOCOMPLETE_TYPES.establishment ? ADDRESS_AUTOCOMPLETE_TYPES.address : ADDRESS_AUTOCOMPLETE_TYPES.establishment
+                            }));
+                          }}
+                        >
+                          {addressTypes[index] === ADDRESS_AUTOCOMPLETE_TYPES.establishment ? "🏢 Establishment" : "📍 Address"}
+                        </Button>
+                      </Form.Label>
                       <AddressAutoComplete
+                        id={`address-autocomplete-${index}`}
                         isInvalid={!!addressErrors.name}
                         defaultValue={_.get(formValues, `stops.${index}.address.name`)}
-                        placeholder="Start typing an address"
-                        types={["establishment"]}
+                        placeholder={`Start typing ${addressTypes[index] === ADDRESS_AUTOCOMPLETE_TYPES.establishment ? "an establishment" : "an address"}`}
+                        types={[addressTypes[index] || ADDRESS_AUTOCOMPLETE_TYPES.establishment]}
                         onSelect={({
                           name,
                           input,
@@ -337,14 +386,14 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
                         }}
                       />
                       <Form.Text className="text-muted">
-                        Establishment name
+                        {addressTypes[index] === "establishment" ? "Establishment name" : "Street address"}
                       </Form.Text>
                       { addressErrors?.name ? <Form.Control.Feedback type='invalid' className='d-block'>
                         {addressErrors?.name?.message}
                       </Form.Control.Feedback> : null }
                     </FormGroup>
                     <div className="d-flex justify-content-end">
-                      <LoadingSimpleButton className={classNames('btn-danger', { 'd-none': stopFields.length <= 1})} onClick={() => removeStop(index)}>
+                      <LoadingSimpleButton className={classNames('btn-danger', { 'd-none': stopFields.length <= 1})} onClick={() => handleRemoveStop(index)}>
                         Remove Stop
                       </LoadingSimpleButton>
                     </div>
@@ -368,7 +417,7 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
       ) : null}
 
       <div className="mb-4">
-        <LoadingSimpleButton className="btn-primary" onClick={() => appendStop(emptyStop())}>
+        <LoadingSimpleButton className="btn-primary" onClick={handleAppendStop}>
           Add Stop
         </LoadingSimpleButton>
       </div>

@@ -34,8 +34,7 @@ export const useConfirmModal = () => {
       <Modal.Body>
         <Row className="justify-content-around align-items-center">
           <Col md={10} className="">
-            <p>Are you sure you want to proceed?</p>
-            { !showData?.message ? null : _.isArray(showData.message) ?
+            { !showData?.message ? <p>Are you sure you want to proceed?</p> : _.isArray(showData.message) ?
               _.compact(showData.message).map((item, index) => (<p key={index} className={classNames('mt-1', messageClassName)}>{item}</p>)) :
               isValidElement(showData.message) ?
                 <div className={classNames('mt-1', messageClassName)}>{showData.message}</div> :

@@ -135,7 +135,17 @@ public class BoardService(
             x.Description, x.Address?.Name, x.Address?.AddressLine1, x.Address?.City, x.Address?.State
         })));
 
-        return keywords.Select(keyword => Fuzz.TokenSetRatio(text.ToLower(), keyword.ToLower())).Prepend(0).Max();
+        // Use PartialRatio to find substring matches (e.g., "parent" matches "parents")
+        // and TokenSetRatio for tokenized matches, then take the maximum
+        return keywords.Select(keyword =>
+        {
+            var val1 = Fuzz.TokenInitialismRatio(text.ToLower(), keyword.ToLower());
+            var val2 = Fuzz.TokenSetRatio(text.ToLower(), keyword.ToLower());
+            var val3 = Fuzz.WeightedRatio(text.ToLower(), keyword.ToLower());
+            var val4 = Fuzz.Ratio(text.ToLower(), keyword.ToLower());
+            
+            return new [] {val1, val2, val3, val4}.Max();
+        }).Prepend(0).Max();
     }
 
     private static IEnumerable<Journey> FuzzySearch(IEnumerable<Journey> journeys, List<string> keywords, int minScore = 50)

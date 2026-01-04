@@ -10,6 +10,7 @@ public class StopMapping : IEntityTypeConfiguration<Stop>
     {
         entity.HasOne(x => x.Address)
             .WithOne(x => x.StopRef)
-            .HasForeignKey<Stop>(x => x.AddressId);
+            .HasForeignKey<Stop>(x => x.AddressId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

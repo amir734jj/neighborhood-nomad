@@ -4,9 +4,9 @@ import React, {useState, useEffect, Fragment} from "react";
 import {Spinner} from "../spinner";
 import {calculateGeographicCenter} from "../../../utilities";
 import chroma from "chroma-js";
-import {MarkerWithInfoWindow} from "../marker-with-info-window/index.jsx";
+import {MarkerWithInfoWindow} from "../marker-with-info-window";
 
-export const GoogleMapsMultiple = ({ defaultCenter = null, locationData = [], style = {}, zoom: defaultZoom = 12 }) => {
+export const GoogleMapsMultiple = ({ defaultCenter = null, locationData = [], style = {}, zoom: defaultZoom = 10 }) => {
   const { publicGlobalConfig: { googleMapsAutoComplete = '' } } = useGlobalConfig();
   const getCenteredPosition = () => calculateGeographicCenter(locationData);
   const [center, setCenter] = useState(getCenteredPosition());

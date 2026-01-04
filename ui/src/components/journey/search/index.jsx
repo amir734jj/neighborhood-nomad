@@ -5,6 +5,9 @@ import _ from "lodash";
 import {MapMultiple} from "../../common";
 import {useWindowSize} from "usehooks-ts";
 import {useGeolocation} from "../../../utilities";
+import {LinkContainer} from "react-router-bootstrap";
+import {getCompiledPath, pages} from "../../../data/index.js";
+import {Link} from "react-router-dom";
 
 const milwaukeeCoordinates = {
   longitude: 87.91,
@@ -48,7 +51,12 @@ export const SearchJourney = () => {
           userLocation={latitude && longitude ? { lat: latitude, lng: longitude } : null}
           locationData={_.flatten(journeys.map(j => j.stops.map(s => ({
             marker: s.address.name,
-            infoWindowContent: <p>{s.description}</p>,
+            infoWindowContent: <Fragment>
+              <p>{s.description}</p>
+              <Link to={getCompiledPath(pages.journey.byId.view, { journeyId: j.id })}>
+                {j.description}
+              </Link>
+            </Fragment>,
             position: {
               lat: s.address.latitude,
               lng: s.address.longitude,

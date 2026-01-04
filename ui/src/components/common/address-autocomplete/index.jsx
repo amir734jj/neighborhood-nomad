@@ -4,6 +4,7 @@ import { Form } from "react-bootstrap";
 import _ from "lodash";
 import { useGlobalConfig } from "../../../state";
 import { Spinner } from "../spinner";
+import {ADDRESS_AUTOCOMPLETE_TYPES} from "../../../constants";
 
 const AddressAutoCompleteHelper = ({
   onSelect = _.noop,
@@ -15,7 +16,7 @@ const AddressAutoCompleteHelper = ({
   //  - ["address"] (default) → only addresses
   //  - ["establishment"] → business/place names
   //  - undefined/[] → allow all supported predictions
-  types = ["address"],
+  types = [ADDRESS_AUTOCOMPLETE_TYPES.address],
   ...props
 }) => {
   const { publicGlobalConfig: { googleMapsAutoComplete = '' } } = useGlobalConfig();
@@ -111,7 +112,10 @@ export const AddressAutoComplete = (props) => {
     return <Spinner />;
   }
 
+  // Force remount when types change by using it as a key
+  const key = props.id || props.types?.join(',') || 'default';
+
   return <Fragment>
-    <AddressAutoCompleteHelper {...props} />
+    <AddressAutoCompleteHelper key={key} {...props} />
   </Fragment>;
 };
