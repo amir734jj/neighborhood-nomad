@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import { getJourneyById} from "../../../api";
 import {getCompiledPath, pages} from "../../../data";
 import {Badge, Card, Col, Container, Row, Spinner} from "react-bootstrap";
-import {MapMultiple} from "../../common";
+import {MapMultiple, FetchImage} from "../../common";
 import {useWindowSize} from "usehooks-ts";
 
 export const ViewJourney = () => {
@@ -46,23 +46,9 @@ export const ViewJourney = () => {
     <Container className="py-4">
       <Row className="mb-4">
         <Col>
-          <h2>{journey.title}</h2>
-          {journey.tags && journey.tags.length > 0 && (
-            <div className="mb-3">
-              {journey.tags.map((tag, index) => (
-                <Badge key={index} bg="secondary" className="me-2">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-          {journey.description && (
-            <Card className="mb-3">
-              <Card.Body>
-                <Card.Text>{journey.description}</Card.Text>
-              </Card.Body>
-            </Card>
-          )}
+          <p>
+            {journey.description}
+          </p>
         </Col>
       </Row>
 
@@ -76,10 +62,29 @@ export const ViewJourney = () => {
         </Col>
       </Row>
 
+      {(journey.photos || []).length ? (
+        <Row className="mb-4">
+          <Col>
+            <h4 className="mb-3">Photos</h4>
+            <Row>
+              {journey.photos.map((photoKey, index) => (
+                <Col xs={12} sm={6} md={4} lg={3} key={index} className="mb-3">
+                  <FetchImage
+                    fileKey={photoKey}
+                    alt={`Journey photo ${index + 1}`}
+                    style={{ width: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                  />
+                </Col>
+              ))}
+            </Row>
+          </Col>
+        </Row>
+      ) : null}
+
       <Row>
         <Col>
           <h4 className="mb-3">Stops</h4>
-          {journey.stops?.map((stop, index) => (
+          {(journey.stops || []).map((stop, index) => (
             <Card key={stop.id} className="mb-3">
               <Card.Body>
                 <Card.Title>
