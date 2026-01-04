@@ -1,34 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { yupExt as yup } from "../../../utilities";
+import React, {useEffect, useState} from "react";
+import {yupExt as yup} from "../../../utilities";
 import {Button, Form, FormGroup} from "react-bootstrap";
-import {
-  AddressAutoComplete,
-  DatetimePicker,
-  LoadingSimpleButton,
-  SimpleButton,
-  GoogleIcon, FileUpload,
-} from "../..//common";
+import {AddressAutoComplete, DatetimePicker, FileUpload, GoogleIcon, LoadingSimpleButton, SimpleButton,} from "../../common";
 import classNames from "classnames";
-import { useForm, useFieldArray } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  DndContext,
-  PointerSensor,
-  KeyboardSensor,
-  useSensors,
-  useSensor,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import {useFieldArray, useForm} from "react-hook-form";
+import {yupResolver} from "@hookform/resolvers/yup";
+import {DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors,} from "@dnd-kit/core";
+import {SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy,} from "@dnd-kit/sortable";
+import {CSS} from "@dnd-kit/utilities";
 import _ from "lodash";
 import {DateTime} from "luxon";
 import {downloadFile, uploadFile} from "../../../api";
-import {ADDRESS_AUTOCOMPLETE_TYPES} from "../../../constants";
+import {ADDRESS_AUTOCOMPLETE_TYPES, USER_ROLES} from "../../../constants";
+import {useAuthStore} from "../../../state";
 
 const addressSchema = yup.object({
   name: yup.string().required("Establishment name is required"),
@@ -89,6 +73,12 @@ const SortableStop = ({id, children}) => {
         : children}
     </div>
   );
+};
+
+export const useCanEditJourney = () => {
+  const authContext = useAuthStore();
+  const isAdmin = authContext?.auth?.role === USER_ROLES.admin;
+  return journey => isAdmin || authContext.auth?.email === journey.email;
 };
 
 export const getEmptyJourney = () => ({
@@ -197,7 +187,8 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
       <FormGroup className="mb-3" controlId="description">
         <Form.Label column="md" className="mb-2 text-muted">Description</Form.Label>
         <Form.Control
-          type="text"
+          as="textarea"
+          rows={3}
           isInvalid={!!errors.description}
           className={classNames("form-control", {
             "is-invalid": errors.description,
@@ -342,7 +333,7 @@ export const JourneyForm = ({ renderSubmit, defaultValues }) => {
                         </Button>
                       </Form.Label>
                       <AddressAutoComplete
-                        id={`address-autocomplete-${index}`}
+                        id={`address-autocomplete-${index}-${addressTypes[index]}`}
                         isInvalid={!!addressErrors.name}
                         defaultValue={_.get(formValues, `stops.${index}.address.name`)}
                         placeholder={`Start typing ${addressTypes[index] === ADDRESS_AUTOCOMPLETE_TYPES.establishment ? "an establishment" : "an address"}`}

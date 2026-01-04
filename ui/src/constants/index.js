@@ -11,3 +11,8 @@ export const ADDRESS_AUTOCOMPLETE_TYPES = Object.freeze({
   address: "address",
   establishment: "establishment",
 });
+
+export const USER_ROLES = Object.freeze({
+  admin: "admin",
+  user: "user",
+});

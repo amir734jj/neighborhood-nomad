@@ -2,10 +2,11 @@ using Logic.Dtos.GlobalConfig;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.Constants;
 
 namespace Api.Controllers;
 
-[Authorize]
+[Authorize(Roles = RoleNameConstants.Admin)]
 [Route("api/[controller]")]
 public class GlobalConfigController(IGlobalConfigService globalConfigService) : ControllerBase
 {

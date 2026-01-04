@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {JourneyForm} from "../common";
+import {JourneyForm, useCanEditJourney} from "../common";
 import {deleteJourney, getJourneyById, updateJourneyById} from "../../../api";
 import {ButtonGroup, Spinner} from "react-bootstrap";
-import {LoadingSimpleButton} from "../../common";
+import {LoadingSimpleButton, NotAuthorize} from "../../common";
 import {getCompiledPath, pages} from "../../../data";
 
 export const EditJourney = () => {
@@ -11,6 +11,8 @@ export const EditJourney = () => {
   const [journey, setJourney] = useState(null);
   const [fetchFailed, setFetchFailed] = useState(null);
   const navigate = useNavigate();
+
+  const canEditJourney = useCanEditJourney();
 
   useEffect(() => {
     getJourneyById(journeyId).then(({ data }) => {
@@ -36,6 +38,10 @@ export const EditJourney = () => {
 
   if (!journey) {
     return <Spinner />;
+  }
+
+  if (!canEditJourney(journey)) {
+    return <NotAuthorize />;
   }
 
   return (

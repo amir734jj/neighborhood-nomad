@@ -3,12 +3,13 @@ using Logic.Dtos.Email;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.Constants;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Api.Controllers;
 
-[Authorize]
+[Authorize(Roles = RoleNameConstants.Admin)]
 [Route("api/[controller]")]
 public class EmailController(IEmailService emailService, ILogger<EmailController> logger) : IdentityController
 {

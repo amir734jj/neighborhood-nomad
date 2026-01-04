@@ -8,7 +8,7 @@ using Models.Constants;
 
 namespace Api.Controllers;
 
-[Authorize]
+[Authorize(Roles = RoleNameConstants.Admin)]
 [Route("Api/[controller]")]
 public class FileController(ISpaceService spaceService) : Controller
 {

@@ -10,10 +10,12 @@ import React, {Fragment} from "react";
 import './style.scss';
 import {RouterNavDropDownItem, RouterNavLink} from "../common";
 import {pages} from "../../data/roles";
+import {USER_ROLES} from "../../constants";
 
 const BasicNavbar = () => {
   const authContext = useAuthStore();
   const isLoggedIn = !!authContext?.auth;
+  const isAdmin = authContext?.auth?.role === USER_ROLES.admin;
   const {pathname} = useLocation();
 
   return (
@@ -27,7 +29,7 @@ const BasicNavbar = () => {
           <Nav className='me-auto'>
             { isLoggedIn ? <Fragment>
               <RouterNavLink to={pages.journey.root} name='Journeys' pathname={pathname} />
-              <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} />
+              { isAdmin ? <RouterNavLink to={pages.configuration} name='Configuration' pathname={pathname} /> : null }
             </Fragment> : null }
             <RouterNavLink to={pages.about} name='About' pathname={pathname} />
           </Nav>
@@ -45,7 +47,10 @@ const BasicNavbar = () => {
                 <RouterNavDropDownItem to={pages.profile} name='Profile' pathname={pathname} />
                 <RouterNavDropDownItem to={pages.logout} name='Logout' pathname={pathname} />
               </NavDropdown>
-            </Fragment>: null }
+            </Fragment>: <Fragment>
+              <RouterNavLink to={pages.login} name='Login' pathname={pathname} />
+              <RouterNavLink to={pages.register} name='Register' pathname={pathname} />
+            </Fragment> }
           </Nav>
         </Navbar.Collapse>
       </Container>

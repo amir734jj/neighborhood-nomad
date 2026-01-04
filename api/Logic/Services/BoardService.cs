@@ -30,7 +30,7 @@ public class BoardService(
             Date = journeyDto.Date,
             SubmissionDate = DateTimeOffset.Now,
             Verified = false,
-            Email = journeyDto.Email,
+            Email = journeyDto.Email.ToLower(),
             Photos = journeyDto.Photos
         });
         

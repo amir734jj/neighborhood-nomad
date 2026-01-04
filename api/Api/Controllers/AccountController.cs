@@ -6,12 +6,14 @@ using Api.Attributes;
 using Api.Configs;
 using Logic.Dtos.Account;
 using Logic.Dtos.Error;
+using Logic.Extensions;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Models.Constants;
 using Models.Entities;
 
 namespace Api.Controllers;
@@ -39,11 +41,12 @@ public class AccountController(
     public async Task<IActionResult> Register([FromBody] RegisterViewModel registerViewModel)
     {
         var anyUser = await userManager.Users.AnyAsync(); // first user to register is enabled
-        var admin = await roleManager.FindByNameAsync("admin");
+        var adminRole = await GetOrCreateRole(RoleNameConstants.Admin);
+        var userRole = await GetOrCreateRole(RoleNameConstants.User);
 
         var user = new User
         {
-            Email = registerViewModel.Email,
+            Email = registerViewModel.Email.ToLower(),
             UserName = registerViewModel.Username,
             Enabled = !anyUser,
             LastLoginDate = null,   // user has not logged-in yet
@@ -58,14 +61,11 @@ public class AccountController(
         // Register the user to the role
         if (!anyUser)
         {
-            if (admin == null)
-            {
-                await roleManager.CreateAsync(new Role("admin"));
-                
-                admin = await roleManager.FindByNameAsync("admin");
-            }
-            
-            identityResults.Add(await userManager.AddToRoleAsync(user, admin!.Name!));
+            identityResults.Add(await userManager.AddToRoleAsync(user, adminRole!.Name!));
+        }
+        else
+        {
+            identityResults.Add(await userManager.AddToRoleAsync(user, userRole!.Name!));
         }
 
         if (identityResults.All(x => x.Succeeded))
@@ -109,6 +109,26 @@ public class AccountController(
         var token = ResolveToken(user);
 
         return Ok(token);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = RoleNameConstants.Admin)]
+    public async Task<IActionResult> ChangeRole([FromBody]ChangeRoleViewModel changeRoleViewModel)
+    {
+        var user = (await GetCurrentUser())!;
+
+        if (user!.HasSameUserName(changeRoleViewModel.UserName))
+        {
+            return BadRequest("Cannot change your own role");
+        }
+
+        var roles = await userManager.GetRolesAsync(user);
+        
+        await userManager.RemoveFromRolesAsync(user, roles);
+        
+        await userManager.AddToRoleAsync(user, changeRoleViewModel.RoleName);
+        
+        return Ok("Successfully changed the role");
     }
 
     [Authorize]
@@ -246,5 +266,19 @@ public class AccountController(
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private async Task<Role?> GetOrCreateRole(string roleName)
+    {
+        var role = await roleManager.FindByNameAsync(roleName);
+
+        if (role == null)
+        {
+            await roleManager.CreateAsync(new Role("admin"));
+
+            return await roleManager.FindByNameAsync(roleName);
+        }
+
+        return role;
     }
 }

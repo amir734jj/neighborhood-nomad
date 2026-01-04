@@ -9,7 +9,7 @@ import {yupResolver} from '@hookform/resolvers/yup';
 import {emailSchema, passwordConfirmationSchema, passwordSchema, usernameSchema} from "../common";
 import _ from "lodash";
 import {pages} from "../../../data";
-import {useGlobalConfig} from "../../../state/index.js";
+import {useGlobalConfig} from "../../../state";
 
 const schema = yup.object({
   ...usernameSchema,

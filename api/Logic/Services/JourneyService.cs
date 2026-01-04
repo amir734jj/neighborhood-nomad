@@ -1,21 +1,57 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
+using Logic.Extensions;
 using Logic.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Models.Entities;
 
 namespace Logic.Services;
 
-public class JourneyService(IEfRepository repository, IStopService stopService) : BasicCrudLogicAbstract<Journey>, IJourneyService
+public class JourneyService(IEfRepository repository, IStopService stopService, IHttpContextAccessor httpContextAccessor) : BasicCrudLogicAbstract<Journey>, IJourneyService
 {
     protected override IBasicCrud<Journey> Repository()
     {
         return repository.For<Journey>();
     }
 
+    public override async Task<IEnumerable<Journey>> GetAll()
+    {
+        var user = await httpContextAccessor.HttpContext.GetUser();
+        
+        return await this.GetAllHelper(filterExprs: [
+            x => x.Email == user!.Email
+        ]);
+    }
+
+    public override async Task<Journey> Delete(int id)
+    {
+        var  entity = await Get(id);
+        
+        var user = await httpContextAccessor.HttpContext.GetUser();
+        var role = await httpContextAccessor.HttpContext.GetRole();
+
+        if (!(role!.IsAdminRole() || user!.HasSameEmail(entity!.Email)))
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        return await base.Delete(id);
+    }
+
     public override async Task<Journey> Update(int id, Journey dto)
     {
+        var user = await httpContextAccessor.HttpContext.GetUser();
+        var role = await httpContextAccessor.HttpContext.GetRole();
+
+        if (!(role!.IsAdminRole() || user!.HasSameEmail(dto.Email)))
+        {
+            throw new UnauthorizedAccessException();
+        }
+        
         var entity = (await Get(id))!;
 
         if (!entity.Photos.ToHashSet().Equals(dto.Photos))

@@ -1,7 +1,7 @@
 import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import { getJourneyById} from "../../../api";
-import {getCompiledPath, pages} from "../../../data";
+import {pages} from "../../../data";
 import {Badge, Card, Col, Container, Row, Spinner} from "react-bootstrap";
 import {MapMultiple, FetchImage} from "../../common";
 import {useWindowSize} from "usehooks-ts";
@@ -42,13 +42,18 @@ export const ViewJourney = () => {
     }
   })) || [];
 
+  const descriptionLines = journey.description?.split('\n').filter(line => line.trim()) || [];
+  const firstLine = descriptionLines[0];
+  const restLines = descriptionLines.slice(1);
+
   return (
     <Container className="py-4">
       <Row className="mb-4">
         <Col>
-          <p>
-            {journey.description}
-          </p>
+          {firstLine && <h3>{firstLine}</h3>}
+          {restLines.map((line, index) => (
+            <p key={index}>{line}</p>
+          ))}
         </Col>
       </Row>
 
@@ -57,7 +62,6 @@ export const ViewJourney = () => {
           <MapMultiple
             style={{ height: height * 0.6, minHeight: '400px' }}
             locationData={locationData}
-            zoom={13}
           />
         </Col>
       </Row>

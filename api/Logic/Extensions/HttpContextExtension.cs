@@ -9,23 +9,55 @@ namespace Logic.Extensions;
 
 public static class HttpContextExtension
 {
-    public static async Task<User?> GetUser(this HttpContext? httpContext)
+    extension(HttpContext? httpContext)
     {
-        if (httpContext == null)
+        public async Task<User?> GetUser()
         {
-            return null;
+            if (httpContext == null)
+            {
+                return null;
+            }
+
+            var userManager = httpContext.RequestServices.GetRequiredService<UserManager<User>>()!;
+            var userService = httpContext.RequestServices.GetRequiredService<IUserService>();
+
+            if (httpContext.User.Identity is { IsAuthenticated: false })
+            {
+                return null;
+            }
+
+            var user = await userManager.FindByNameAsync(httpContext.User.Identity!.Name!);
+
+            return user != null ? await userService.Get(user.Id) : null;
         }
 
-        var userManager = httpContext.RequestServices.GetRequiredService<UserManager<User>>()!;
-        var userService = httpContext.RequestServices.GetRequiredService<IUserService>();
-
-        if (httpContext.User.Identity is { IsAuthenticated: false })
+        public async Task<Role?> GetRole()
         {
-            return null;
+            if (httpContext == null)
+            {
+                return null;
+            }
+
+            var user = await httpContext.GetUser();
+            
+            if (user == null)
+            {
+                return null;
+            }
+
+            var roleManager = httpContext.RequestServices.GetRequiredService<RoleManager<Role>>()!;
+            var userManager = httpContext.RequestServices.GetRequiredService<UserManager<User>>()!;
+
+            var roles = await userManager.GetRolesAsync(user);
+            
+            if (roles.Count == 0)
+            {
+                return null;
+            }
+
+            var role = await roleManager.FindByNameAsync(roles[0]);
+
+            return role;
         }
-
-        var user = await userManager.FindByNameAsync(httpContext.User.Identity!.Name!);
-
-        return user != null ? await userService.Get(user.Id) : null;
     }
 }

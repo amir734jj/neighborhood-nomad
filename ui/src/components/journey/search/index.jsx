@@ -5,8 +5,7 @@ import _ from "lodash";
 import {MapMultiple} from "../../common";
 import {useWindowSize} from "usehooks-ts";
 import {useGeolocation} from "../../../utilities";
-import {LinkContainer} from "react-router-bootstrap";
-import {getCompiledPath, pages} from "../../../data/index.js";
+import {getCompiledPath, pages} from "../../../data";
 import {Link} from "react-router-dom";
 
 const milwaukeeCoordinates = {
@@ -64,13 +63,28 @@ export const SearchJourney = () => {
           }))))} />
       </Col>
       <Col xs={12} md={4}>
-        <Form.Label column="md" className="mb-2 text-muted">Keywords</Form.Label>
-        <Form.Control
-          type="text"
-          onChange={e => {
-            searchJourneys(e.target.value);
-          }}
-        />
+        <Row>
+          <Col xs={12}>
+            <Form.Label column="md" className="mb-2 text-muted">Keywords</Form.Label>
+            <Form.Control
+              type="text"
+              onChange={e => {
+                searchJourneys(e.target.value);
+              }}
+            />
+          </Col>
+          <Col xs={12}>
+            { journeys.length ? <ul className='mt-2'>
+              { journeys.map(journey => (
+                <li key={journey.id}>
+                  <Link to={getCompiledPath(pages.journey.byId.view,  { journeyId: journey.id })}>
+                    {journey.description}
+                  </Link>
+                </li>
+              ))}
+            </ul> : null }
+          </Col>
+        </Row>
       </Col>
     </Row>
   </Fragment>;

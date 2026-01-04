@@ -105,7 +105,7 @@ const AddressAutoCompleteHelper = ({
   );
 };
 
-export const AddressAutoComplete = (props) => {
+export const AddressAutoComplete = ({ id, ...props }) => {
   const { publicGlobalConfig: { googleMapsAutoComplete = '' } } = useGlobalConfig();
 
   if (!googleMapsAutoComplete) {
@@ -113,7 +113,7 @@ export const AddressAutoComplete = (props) => {
   }
 
   // Force remount when types change by using it as a key
-  const key = props.id || props.types?.join(',') || 'default';
+  const key = id || props.types?.join(',') || 'default';
 
   return <Fragment>
     <AddressAutoCompleteHelper key={key} {...props} />

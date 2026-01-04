@@ -4,8 +4,7 @@ import {getEmptyJourney, JourneyForm} from "../common";
 import {getCompiledPath, pages} from "../../../data";
 import {submitJourney} from "../../../api";
 import {LoadingSimpleButton} from "../../common";
-import {useAuthStore} from "../../../state/index.js";
-import {emailSchema as formValues} from "../../account/common/index.js";
+import {useAuthStore} from "../../../state";
 
 export const AddJourney = () => {
   const navigate = useNavigate();
