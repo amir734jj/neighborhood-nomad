@@ -14,4 +14,12 @@ public class JourneyController(IJourneyService journeyService) : BasicCrudContro
     {
         return journeyService;
     }
+
+    [AllowAnonymous]
+    [HttpGet]
+    [Route("{id:int}")]
+    public override Task<IActionResult> Get(int id)
+    {
+        return base.Get(id);
+    }
 }
