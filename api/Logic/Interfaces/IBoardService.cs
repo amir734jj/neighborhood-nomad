@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Models.Entities;
@@ -10,5 +11,5 @@ public interface IBoardService
     
     public Task<List<Journey>> GetJourneys(List<string> keywords);
     
-    public Task Confirm(int journeyId, string email);
+    public Task Confirm(Guid journeyId, string email);
 }

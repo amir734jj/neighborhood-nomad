@@ -27,7 +27,7 @@ public class BoardController(IBoardService boardService) : Controller
     
     [HttpGet]
     [Route("confirm")]
-    public virtual async Task<IActionResult> Confirm([FromQuery] int journeyId, [FromQuery] string email)
+    public virtual async Task<IActionResult> Confirm([FromQuery] Guid journeyId, [FromQuery] string email)
     {
         await boardService.Confirm(journeyId, email);
         

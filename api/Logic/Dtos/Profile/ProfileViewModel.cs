@@ -1,8 +1,10 @@
+using System;
+
 namespace Logic.Dtos.Profile;
 
 public class ProfileViewModel
 {
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 
     public string? Username { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Models.Interfaces;
 
 namespace Models.Entities
@@ -6,7 +7,7 @@ namespace Models.Entities
     [Table(nameof(Address))]
     public class Address : IEntity
     {
-        public int Id  { get; set; }
+        public Guid Id  { get; set; }
         
         public string Name { get; set; }
         

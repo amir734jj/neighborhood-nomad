@@ -5,7 +5,7 @@ using Models.Entities;
 namespace Data;
 
 public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options)
-    : IdentityDbContext<User, Role, int>(options)
+    : IdentityDbContext<User, Role, Guid>(options)
 {
     public DbSet<Address> Addresses { get; set; }
     

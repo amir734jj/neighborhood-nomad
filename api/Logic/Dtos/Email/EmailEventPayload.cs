@@ -1,6 +1,8 @@
+using System;
+
 namespace Logic.Dtos.Email;
 
 public class EmailEventPayload
 {
-    public int JourneyId { get; set; }
+    public Guid JourneyId { get; set; }
 }

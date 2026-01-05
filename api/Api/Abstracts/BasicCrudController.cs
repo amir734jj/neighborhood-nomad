@@ -20,15 +20,15 @@ public abstract class BasicCrudController<T> : Controller
     }
     
     [HttpGet]
-    [Route("{id:int}/deletable")]
-    public virtual async Task<IActionResult> CanBeDeleted([FromRoute] int id)
+    [Route("{id:guid}/deletable")]
+    public virtual async Task<IActionResult> CanBeDeleted([FromRoute] Guid id)
     {
         return Ok(await BasicCrudLogic().CanBeDeleted(id));
     }
 
     [HttpGet]
-    [Route("{id:int}")]
-    public virtual async Task<IActionResult> Get([FromRoute] int id)
+    [Route("{id:guid}")]
+    public virtual async Task<IActionResult> Get([FromRoute] Guid id)
     {
         var result = await BasicCrudLogic().Get(id);
 
@@ -41,15 +41,15 @@ public abstract class BasicCrudController<T> : Controller
     }
 
     [HttpPut]
-    [Route("{id:int}")]
-    public virtual async Task<IActionResult> Update([FromRoute] int id, [FromBody] T instance)
+    [Route("{id:guid}")]
+    public virtual async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] T instance)
     {
         return Ok(await BasicCrudLogic().Update(id, instance));
     }
 
     [HttpDelete]
-    [Route("{id:int}")]
-    public virtual async Task<IActionResult> Delete([FromRoute] int id)
+    [Route("{id:guid}")]
+    public virtual async Task<IActionResult> Delete([FromRoute] Guid id)
     {
         return Ok(await BasicCrudLogic().Delete(id));
     }
@@ -63,7 +63,7 @@ public abstract class BasicCrudController<T> : Controller
 
     [HttpGet]
     [Route("filtered")]
-    public async Task<IActionResult> GetAllFiltered([FromQuery] int[] ids)
+    public async Task<IActionResult> GetAllFiltered([FromQuery] Guid[] ids)
     {
         return Ok(await BasicCrudLogic().GetAllFiltered(ids));
     }

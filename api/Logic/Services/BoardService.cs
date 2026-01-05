@@ -10,7 +10,6 @@ using Models.Entities;
 using Logic.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Logic.Services;
 
@@ -118,7 +117,7 @@ public class BoardService(
         return FuzzySearch(journeys, keywords).ToList();
     }
 
-    public async Task Confirm(int journeyId, string email)
+    public async Task Confirm(Guid journeyId, string email)
     {
         var journey = (await journeyService.GetAllHelper(filterExprs:[x => x.Id == journeyId, x => !x.Verified])).FirstOrDefault();
 

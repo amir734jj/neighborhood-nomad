@@ -4,7 +4,7 @@ using Models.Interfaces;
 
 namespace Models.Entities
 {
-    public class User : IdentityUser<int>, IEntity
+    public class User : IdentityUser<Guid>, IEntity
     {
         public string? Name { get; set; }
         

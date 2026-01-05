@@ -8,7 +8,7 @@ namespace Models.Entities
     [Table(nameof(Journey))]
     public class Journey : IEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         public DateTimeOffset Date { get; set; }
         

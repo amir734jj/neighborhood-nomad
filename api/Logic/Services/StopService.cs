@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
@@ -13,7 +14,7 @@ public class StopService(IEfRepository repository, IAddressService addressServic
         return repository.For<Stop>();
     }
 
-    public override async Task<Stop> Update(int id, Stop dto)
+    public override async Task<Stop> Update(Guid id, Stop dto)
     {
         var entity = (await Get(id))!;
         
@@ -25,7 +26,7 @@ public class StopService(IEfRepository repository, IAddressService addressServic
             }
         }
         // made-up conversion to signal it's a new row
-        else if (dto.Address.Id != 0)
+        else if (dto.Address.Id != Guid.Empty)
         {
             await addressService.Update(dto.Address.Id, dto.Address);
         }

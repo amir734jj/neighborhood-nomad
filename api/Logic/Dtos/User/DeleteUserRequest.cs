@@ -1,6 +1,8 @@
+using System;
+
 namespace Logic.Dtos.User;
 
 public class DeleteUserRequest
 {
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 }

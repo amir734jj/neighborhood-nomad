@@ -27,7 +27,7 @@ public class JourneyService(IEfRepository repository, IStopService stopService, 
         ]);
     }
 
-    public override async Task<Journey> Delete(int id)
+    public override async Task<Journey> Delete(Guid id)
     {
         var  entity = await Get(id);
         
@@ -42,7 +42,7 @@ public class JourneyService(IEfRepository repository, IStopService stopService, 
         return await base.Delete(id);
     }
 
-    public override async Task<Journey> Update(int id, Journey dto)
+    public override async Task<Journey> Update(Guid id, Journey dto)
     {
         var user = await httpContextAccessor.HttpContext.GetUser();
         var role = await httpContextAccessor.HttpContext.GetRole();

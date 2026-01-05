@@ -17,8 +17,8 @@ public class JourneyController(IJourneyService journeyService) : BasicCrudContro
 
     [AllowAnonymous]
     [HttpGet]
-    [Route("{id:int}")]
-    public override Task<IActionResult> Get(int id)
+    [Route("{id:guid}")]
+    public override Task<IActionResult> Get(Guid id)
     {
         return base.Get(id);
     }

@@ -45,12 +45,12 @@ public abstract class BasicCrudLogicAbstract<T> : IBasicCrudLogic<T>, IBasicCrud
             maxResults: maxResults);
     }
 
-    public async Task<IEnumerable<T>> DeleteMany(params int[] ids)
+    public async Task<IEnumerable<T>> DeleteMany(params Guid[] ids)
     {
         return await Repository().DeleteMany(ids);
     }
 
-    public async Task<IEnumerable<T>> BulkUpdate(int[] ids, Action<T> modifyAction)
+    public async Task<IEnumerable<T>> BulkUpdate(Guid[] ids, Action<T> modifyAction)
     {
         return await Repository().BulkUpdate(ids, modifyAction, batchSize: 100);
     }
@@ -60,19 +60,19 @@ public abstract class BasicCrudLogicAbstract<T> : IBasicCrudLogic<T>, IBasicCrud
         return await Repository().SaveMany(entities);
     }
 
-    public async Task<IEnumerable<T>> GetAllFiltered(int[] ids)
+    public async Task<IEnumerable<T>> GetAllFiltered(Guid[] ids)
     {
         return await Repository().GetAll(ids);
     }
 
-    public async Task<bool> CanBeDeleted(int id)
+    public async Task<bool> CanBeDeleted(Guid id)
     {
         var entity = await Get(id);
 
         return !await Repository().HasReferences(entity!);
     }
 
-    public virtual async Task<T?> Get(int id)
+    public virtual async Task<T?> Get(Guid id)
     {
         return await Repository().Get(id);
     }
@@ -86,12 +86,12 @@ public abstract class BasicCrudLogicAbstract<T> : IBasicCrudLogic<T>, IBasicCrud
         return (await Get(result.Id))!;
     }
 
-    public virtual async Task<T> Delete(int id)
+    public virtual async Task<T> Delete(Guid id)
     {
         return await Repository().Delete(id);
     }
 
-    public virtual async Task<T> Update(int id, T dto)
+    public virtual async Task<T> Update(Guid id, T dto)
     {
         await Repository().Update(id, dto);
 
@@ -100,7 +100,7 @@ public abstract class BasicCrudLogicAbstract<T> : IBasicCrudLogic<T>, IBasicCrud
         return (await Get(id))!;
     }
 
-    public virtual async Task<T> Update(int id, Action<T> modifyAction)
+    public virtual async Task<T> Update(Guid id, Action<T> modifyAction)
     {
         await Repository().Update(id, modifyAction);
         
