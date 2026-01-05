@@ -274,7 +274,7 @@ public class AccountController(
 
         if (role == null)
         {
-            await roleManager.CreateAsync(new Role("admin"));
+            await roleManager.CreateAsync(new Role(roleName));
 
             return await roleManager.FindByNameAsync(roleName);
         }
