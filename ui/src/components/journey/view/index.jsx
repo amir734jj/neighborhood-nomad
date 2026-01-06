@@ -42,18 +42,15 @@ export const ViewJourney = () => {
     }
   })) || [];
 
-  const descriptionLines = journey.description?.split('\n').filter(line => line.trim()) || [];
-  const firstLine = descriptionLines[0];
-  const restLines = descriptionLines.slice(1);
+  const firstLine = journey.singleLineDescription;
+  const restLines = journey.moreDescription;
 
   return (
     <Container className="py-4">
       <Row className="mb-4">
         <Col>
-          {firstLine && <h3>{firstLine}</h3>}
-          {restLines.map((line, index) => (
-            <p key={index}>{line}</p>
-          ))}
+          <h3>{firstLine}</h3>
+          { restLines ? <p>{restLines}</p> : null }
         </Col>
       </Row>
 

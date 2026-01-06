@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Models.Interfaces;
 
 namespace Models.Entities
@@ -21,6 +22,14 @@ namespace Models.Entities
         public ICollection<Stop> Stops { get; set; }
         
         public string Description { get; set; }
+        
+        // Derived property
+        [NotMapped]
+        public string SingleLineDescription => Description.Split(Environment.NewLine).FirstOrDefault() ?? string.Empty;
+ 
+        // Derived property
+        [NotMapped]
+        public string MoreDescription => string.Join(Environment.NewLine, Description.Split(Environment.NewLine).Skip(1));
 
         public string[] Photos { get; set; }
     }

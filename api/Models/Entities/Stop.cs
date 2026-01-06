@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Models.Interfaces;
+using Newtonsoft.Json;
 
 namespace Models.Entities
 {
@@ -9,6 +10,7 @@ namespace Models.Entities
     {
         public Guid Id { get; set; }
         
+        [JsonIgnore]
         public int Number { get; set; }
         
         public string Description { get; set; }
