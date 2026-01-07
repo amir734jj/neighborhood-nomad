@@ -28,10 +28,19 @@ export const ViewJourney = () => {
           lng: stop.address.longitude,
         }
       })));
-      const { data: weather } = await queryWeather(center.lat, center.lng, journey.date);
-      setWeather(weather);
+      
+      // Wrap weather query in try-catch so failures don't break the page
+      try {
+        const { data: weather } = await queryWeather(center.lat, center.lng, journey.date);
+        setWeather(weather);
+      } catch (weatherErr) {
+        // Log the error but don't throw - journey should still display
+        console.error('Failed to fetch weather data:', weatherErr);
+        // setWeather remains null, so weather won't be displayed
+      }
 
     } catch (err) {
+      // Only set fetchFailed if journey data fails to load
       setFetchFailed(err);
     }
   };
