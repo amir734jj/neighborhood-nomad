@@ -17,7 +17,7 @@ namespace Logic.Services;
 
 public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globalConfigService) : IWeatherService
 {
-    public async Task<WeatherResult> Query(float latitude, float longitude, DateTime date)
+    public async Task<WeatherResult> Query(float latitude, float longitude, DateTimeOffset date)
     {
         var cacheKey = StringUtilities.ToMemoryCacheKey<WeatherResult>(
             latitude.ToString(CultureInfo.InvariantCulture),
@@ -29,34 +29,30 @@ public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globa
             return cachedResult!;
         }
 
-        // Try to get NOAA data first
-        var noaaData = await GetWeatherByCoords(latitude, longitude, date);
+        var timeZoneInfo = TimeZoneFromCoordinates.GetTimeZoneInfo(latitude, longitude);
+        var localTime = TimeZoneInfo.ConvertTime(date, timeZoneInfo);
+        
+        // Try OpenMeteo first
         WeatherResult? result = null;
         
-        if (noaaData != null)
+        // Try OpenMetro first
+        var client = new OpenMeteoClient();
+
+        var data = await client.QueryAsync(new WeatherForecastOptions
         {
-            result = ParseNoaaDataToWeatherResult(noaaData);
-        }
+            Latitude = latitude,
+            Longitude = longitude,
+            Start_date = localTime.ToString("yyyy-MM-dd"),
+            End_date = localTime.ToString("yyyy-MM-dd"),
+            Daily = DailyOptions.All,
+            Timezone = timeZoneInfo.Id,
+            Current = CurrentOptions.All,
+            Temperature_Unit = TemperatureUnitType.fahrenheit,
+            Windspeed_Unit = WindspeedUnitType.mph
+        });
 
-        // If NOAA fails, fall back to OpenMeteo
-        if (result == null)
+        if (data?.Current != null)
         {
-            var timeZoneInfo = TimeZoneFromCoordinates.GetTimeZoneInfo(latitude, longitude);
-            var client = new OpenMeteoClient();
-
-            var data = await client.QueryAsync(new WeatherForecastOptions
-            {
-                Latitude = latitude,
-                Longitude = longitude,
-                Start_date = date.ToString("yyyy-MM-dd"),
-                End_date = date.ToString("yyyy-MM-dd"),
-                Daily = DailyOptions.All,
-                Timezone = timeZoneInfo.Id,
-                Current = CurrentOptions.All,
-                Temperature_Unit = TemperatureUnitType.fahrenheit,
-                Windspeed_Unit = WindspeedUnitType.mph
-            });
-
             var weatherCode = (int)data!.Current!.Weathercode!;
 
             result = new WeatherResult
@@ -67,9 +63,25 @@ public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globa
                 Temperature = data.Current.Temperature
             };
         }
+        
+        // If OpenMeteo fails, fall back to NOAA
+        if (result == null)
+        {
+            var noaaData = await GetWeatherByCoords(latitude, longitude, localTime);
+            
+            if (noaaData != null)
+            {
+                result = ParseNoaaDataToWeatherResult(noaaData);
+            }
+        }
+
+        if (result is null)
+        {
+            throw new ArgumentException("Failed to fetch weather data");
+        }
 
         var cacheOptions = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(TimeSpan.MaxValue);
+            .SetAbsoluteExpiration(TimeSpan.FromDays(7));
 
         memoryCache.Set(cacheKey, result, cacheOptions);
 
@@ -111,7 +123,7 @@ public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globa
     };
 
 
-    private async Task<string?> GetWeatherByCoords(double lat, double lon, DateTime date)
+    private async Task<string?> GetWeatherByCoords(double lat, double lon, DateTimeOffset date)
     {
         var globalConfig = await globalConfigService.GetAllGlobalConfig();
         using HttpClient client = new();
@@ -122,7 +134,6 @@ public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globa
         client.DefaultRequestHeaders.Add("token", globalConfig.NCEIWeatherApiKey);
 
         // --- STEP 1: Find stations with an expanding radius ---
-        JsonDocument? stationDoc = null;
         var radius = 0.1; // Start with ~7 miles
         const double maxRadius = 0.5; // Don't go further than ~35 miles
 
@@ -137,67 +148,54 @@ public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globa
 
             var stationSearchUrl = QueryHelpers.AddQueryString($"{baseUrl}/stations", stationParams);
             var stationResponse = await client.GetStringAsync(stationSearchUrl);
-            stationDoc = JsonDocument.Parse(stationResponse);
+            var stationDoc = JsonDocument.Parse(stationResponse);
 
-            // If we found results, break the loop
-            if (stationDoc.RootElement.TryGetProperty("results", out _))
+            // If we found results, try to get data from them
+            if (stationDoc.RootElement.TryGetProperty("results", out var stations))
             {
-                break;
-            }
+                // --- STEP 2: Priority Sorting (Official WBAN/COOP first, then distance) ---
+                var stationList = stations.EnumerateArray()
+                    .Select(s => new
+                    {
+                        Id = s.GetProperty("id").GetString()!,
+                        IsOfficial = s.GetProperty("id").GetString()!.StartsWith("GHCND:USW") ||
+                                     s.GetProperty("id").GetString()!.StartsWith("GHCND:USC"),
+                        Distance = CalculateDistance(lat, lon, s.GetProperty("latitude").GetDouble(),
+                            s.GetProperty("longitude").GetDouble())
+                    })
+                    .OrderByDescending(s => s.IsOfficial)
+                    .ThenBy(s => s.Distance)
+                    .ToList();
 
-            // Otherwise, increase the search area and try again
-            radius += 0.1;
-        }
-
-        // Check if we exited the loop without finding anything even at maxRadius
-        if (stationDoc == null || !stationDoc.RootElement.TryGetProperty("results", out var stations))
-        {
-            return null;
-        }
-
-        // --- STEP 2: Priority Sorting (Official WBAN/COOP first, then distance) ---
-        var stationList = stations.EnumerateArray()
-            .Select(s => new
-            {
-                Id = s.GetProperty("id").GetString()!,
-                IsOfficial = s.GetProperty("id").GetString()!.StartsWith("GHCND:USW") ||
-                             s.GetProperty("id").GetString()!.StartsWith("GHCND:USC"),
-                Distance = CalculateDistance(lat, lon, s.GetProperty("latitude").GetDouble(),
-                    s.GetProperty("longitude").GetDouble())
-            })
-            .OrderByDescending(s => s.IsOfficial)
-            .ThenBy(s => s.Distance)
-            .ToList();
-
-        // --- STEP 3: Data Retrieval with Fallback Loop ---
-        foreach (var station in stationList)
-        {
-            var dataParams = new Dictionary<string, string?>
-            {
-                ["datasetid"] = "GHCND",
-                ["stationid"] = station.Id,
-                ["startdate"] = dateStr,
-                ["enddate"] = dateStr,
-                ["units"] = "standard"
-            };
-
-            // Construct Data URL
-            var dataUrl = QueryHelpers.AddQueryString($"{baseUrl}/data", dataParams);
-
-            var dataResponse = await client.GetAsync(dataUrl);
-            var content = await dataResponse.Content.ReadAsStringAsync();
-
-            // Check if JSON is not empty and contains the "results" array
-            if (dataResponse.IsSuccessStatusCode)
-            {
-                var jsonDocument = JsonDocument.Parse(content);
-                if (jsonDocument.RootElement.TryGetProperty("results", out var resultsArray) &&
-                    resultsArray.ValueKind == JsonValueKind.Array &&
-                    resultsArray.GetArrayLength() > 0)
+                // --- STEP 3: Data Retrieval with Fallback Loop ---
+                foreach (var dataUrl in stationList.Select(station => new Dictionary<string, string?>
+                         {
+                             ["datasetid"] = "GHCND",
+                             ["stationid"] = station.Id,
+                             ["startdate"] = dateStr,
+                             ["enddate"] = dateStr,
+                             ["units"] = "standard"
+                         }).Select(dataParams => QueryHelpers.AddQueryString($"{baseUrl}/data", dataParams)))
                 {
-                    return content; // Success: Return the first station that actually has data
+                    var dataResponse = await client.GetAsync(dataUrl);
+                    var content = await dataResponse.Content.ReadAsStringAsync();
+
+                    // Check if JSON is not empty and contains the "results" array
+                    if (dataResponse.IsSuccessStatusCode)
+                    {
+                        var jsonDocument = JsonDocument.Parse(content);
+                        if (jsonDocument.RootElement.TryGetProperty("results", out var resultsArray) &&
+                            resultsArray.ValueKind == JsonValueKind.Array &&
+                            resultsArray.GetArrayLength() > 0)
+                        {
+                            return content; // Success: Return the first station that actually has data
+                        }
+                    }
                 }
             }
+
+            // No stations found or no data from any station, increase the search area and try again
+            radius += 0.1;
         }
 
         return null;

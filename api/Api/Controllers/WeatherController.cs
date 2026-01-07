@@ -10,7 +10,7 @@ namespace Api.Controllers;
 public class WeatherController(IWeatherService weatherService) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> GetWeather([FromQuery] float longitude, [FromQuery] float latitude, [FromQuery] DateTime date)
+    public async Task<IActionResult> GetWeather([FromQuery] float longitude, [FromQuery] float latitude, [FromQuery] DateTimeOffset date)
     {
         var result = await weatherService.Query(latitude, longitude, date);
         return Ok(result);
