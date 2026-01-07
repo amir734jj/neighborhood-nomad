@@ -8,5 +8,5 @@ export const queryWeather = (latitude, longitude, date) => axios.get('/weather',
   paramsSerializer: params => {
     return qs.stringify(params);
   },
-  timeout: 10000
+  timeout: 20000
 });
