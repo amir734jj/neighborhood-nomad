@@ -14,8 +14,7 @@ namespace Logic.Services;
 public class PersistentCacheService(IEfRepository repository, IRecurringJobManager recurringJobManager) : JobBaseAbstract(Cron.Minutely()), IPersistentCacheService
 {
     private IBasicCrud<PersistentCacheItem> BasicCrud => repository.For<PersistentCacheItem>().SplitQuery();
-    
-    
+
     public async Task CreateOrUpdate<T>(string key, T value, TimeSpan? expires = null) where T : class, new()
     {
         expires ??= TimeSpan.FromHours(1);
