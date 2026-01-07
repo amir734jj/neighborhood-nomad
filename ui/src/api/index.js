@@ -6,3 +6,4 @@ export * from './file';
 export * from './email';
 export * from './board';
 export * from './journey';
+export * from './weather';

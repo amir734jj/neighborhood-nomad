@@ -9,7 +9,7 @@ import {getCompiledPath, pages} from "../../../data";
 import {Link} from "react-router-dom";
 
 const milwaukeeCoordinates = {
-  longitude: 87.91,
+  longitude: -87.91,
   latitude: 43.04
 };
 

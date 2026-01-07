@@ -8,6 +8,10 @@ namespace Logic.Dtos.GlobalConfig;
 
 public class GlobalConfigModel(IHostEnvironment hostEnvironment)
 {
+    // National Centers for Environmental Information (NCEI)
+    [GlobalConfigCol(Name = "NCEI_WEATHER_API_KEY")]
+    public string NCEIWeatherApiKey { get; set; }
+    
     [GlobalConfigCol(Name = "GEOCODI_API_KEY")]
     public string GeocodioApiKey { get; set; }
 

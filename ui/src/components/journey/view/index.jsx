@@ -1,10 +1,13 @@
 import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import { getJourneyById} from "../../../api";
+import {getJourneyById, queryWeather} from "../../../api";
 import {pages} from "../../../data";
 import {Badge, Card, Col, Container, Row, Spinner} from "react-bootstrap";
 import {MapMultiple, FetchImage} from "../../common";
 import {useWindowSize} from "usehooks-ts";
+import {calculateGeographicCenter} from "../../../utilities";
+import {WeatherInfo} from "../../weather";
+import {DateTime} from "luxon";
 
 export const ViewJourney = () => {
   const {journeyId} = useParams();
@@ -12,13 +15,29 @@ export const ViewJourney = () => {
   const [journey, setJourney] = useState(null);
   const [fetchFailed, setFetchFailed] = useState(null);
   const navigate = useNavigate();
+  const [weather, setWeather] = useState(null);
+
+  const fetchData = async (journeyId) => {
+    try {
+      const { data: journey } = await getJourneyById(journeyId);
+      setJourney(journey);
+
+      const center = calculateGeographicCenter(journey.stops.map(stop => ({
+        position: {
+          lat: stop.address.latitude,
+          lng: stop.address.longitude,
+        }
+      })));
+      const { data: weather } = await queryWeather(center.lat, center.lng, journey.date);
+      setWeather(weather);
+
+    } catch (err) {
+      setFetchFailed(err);
+    }
+  };
 
   useEffect(() => {
-    getJourneyById(journeyId).then(({ data }) => {
-      setJourney(data);
-    }).catch((err) => {
-      setFetchFailed(err);
-    });
+    fetchData(journeyId);
   }, [journeyId]);
 
   if (fetchFailed) {
@@ -51,6 +70,12 @@ export const ViewJourney = () => {
         <Col>
           <h3>{firstLine}</h3>
           { restLines ? <p>{restLines}</p> : null }
+          <div className="d-flex align-items-center gap-3 mt-2">
+            <small className="text-muted">
+              {DateTime.fromISO(journey.date).toLocaleString(DateTime.DATE_HUGE)}
+            </small>
+            { weather ? <WeatherInfo {...weather} /> : null }
+          </div>
         </Col>
       </Row>
 

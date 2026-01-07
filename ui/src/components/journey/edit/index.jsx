@@ -47,6 +47,7 @@ export const EditJourney = () => {
   return (
     <JourneyForm
       defaultValues={journey}
+      readOnlyValues={['email']}
       renderSubmit={SubmitForm} />
   );
 
