@@ -4,7 +4,6 @@ using Hangfire;
 using Logic.Abstracts;
 using Logic.Interfaces;
 using Logic.Services;
-using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 
 namespace Logic.BackgroundTask;
@@ -15,8 +14,7 @@ public class CleanupPhotos(IJourneyService journeyService, ISpaceService spaceSe
     {
         var journeys = await journeyService.GetAllHelper(
             project: x => new Journey { Photos = x.Photos },
-            filterExprs: [x => x.Photos.Any()],
-            includeExprs: x => x.Include(y => y.Photos));
+            filterExprs: [x => x.Photos.Any()]);
 
         var referencedFiles = journeys.SelectMany(x => x.Photos).ToList();
 

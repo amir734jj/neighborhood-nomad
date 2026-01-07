@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using EfCoreRepository.Extensions;
 using EfCoreRepository.Interfaces;
 using Hangfire;
+using Logic.Abstracts;
 using Logic.Interfaces;
 using Models.Entities;
 using Newtonsoft.Json;
 
 namespace Logic.Services;
 
-public class PersistentCacheService(IEfRepository repository, IRecurringJobManager recurringJobManager) : IPersistentCacheService
+public class PersistentCacheService(IEfRepository repository, IRecurringJobManager recurringJobManager) : JobBaseAbstract(Cron.Minutely()), IPersistentCacheService
 {
     private IBasicCrud<PersistentCacheItem> BasicCrud => repository.For<PersistentCacheItem>().SplitQuery();
     
@@ -57,9 +58,7 @@ public class PersistentCacheService(IEfRepository repository, IRecurringJobManag
         return items.Count != 0 ? (true, JsonConvert.DeserializeObject<T>(items.First().Value)!) : (false, null);
     }
 
-    public string Schedule => Cron.Minutely();
-    
-    public async Task ExecuteAsync()
+    public override async Task ExecuteAsync()
     {
         await BasicCrud.Delete([
             persistentCacheItem => DateTimeOffset.UtcNow - persistentCacheItem.AccessTime > persistentCacheItem.Expires
