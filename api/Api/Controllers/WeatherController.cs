@@ -1,5 +1,4 @@
 using Logic.Interfaces;
-using Logic.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

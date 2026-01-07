@@ -10,12 +10,11 @@ using Logic.Dtos.Weather;
 using Logic.Interfaces;
 using Logic.Utility;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Caching.Memory;
 using OpenMeteo;
 
 namespace Logic.Services;
 
-public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globalConfigService) : IWeatherService
+public class WeatherService(IPersistentCacheService persistentCacheService, IGlobalConfigService globalConfigService) : IWeatherService
 {
     public async Task<WeatherResult> Query(float latitude, float longitude, DateTimeOffset date)
     {
@@ -24,9 +23,11 @@ public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globa
             longitude.ToString(CultureInfo.InvariantCulture),
             date.ToString("yyyy-MM-dd"));
 
-        if (memoryCache.TryGetValue<WeatherResult>(cacheKey, out var cachedResult))
+        var cachedResult = await persistentCacheService.TryGet<WeatherResult>(cacheKey);
+
+        if (cachedResult.Success)
         {
-            return cachedResult!;
+            return cachedResult.Value!;
         }
 
         var timeZoneInfo = TimeZoneFromCoordinates.GetTimeZoneInfo(latitude, longitude);
@@ -80,10 +81,7 @@ public class WeatherService(IMemoryCache memoryCache, IGlobalConfigService globa
             throw new ArgumentException("Failed to fetch weather data");
         }
 
-        var cacheOptions = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(TimeSpan.FromDays(7));
-
-        memoryCache.Set(cacheKey, result, cacheOptions);
+        await persistentCacheService.CreateOrUpdate(cacheKey, result, TimeSpan.MaxValue);
 
         return result;
     }

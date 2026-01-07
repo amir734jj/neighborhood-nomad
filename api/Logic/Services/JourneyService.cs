@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
+using Hangfire;
 using Logic.Abstracts;
 using Logic.Extensions;
 using Logic.Interfaces;
@@ -11,7 +12,12 @@ using Models.Entities;
 
 namespace Logic.Services;
 
-public class JourneyService(IEfRepository repository, IStopService stopService, IHttpContextAccessor httpContextAccessor) : BasicCrudLogicAbstract<Journey>, IJourneyService
+public class JourneyService(
+    IEfRepository repository,
+    IStopService stopService,
+    IHttpContextAccessor httpContextAccessor,
+    IBackgroundJobClient backgroundJobClient,
+    IPersistentCacheService persistentCacheService) : BasicCrudLogicAbstract<Journey>, IJourneyService
 {
     protected override IBasicCrud<Journey> Repository()
     {

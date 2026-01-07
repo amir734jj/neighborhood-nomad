@@ -14,6 +14,8 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options)
     public DbSet<Journey> Journeys { get; set; }
     
     public DbSet<GlobalConfig> GlobalConfig  { get; set; }
+    
+    public DbSet<PersistentCacheItem> PersistentCacheItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

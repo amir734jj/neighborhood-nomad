@@ -5,7 +5,6 @@ using Logic.Interfaces;
 using Scrutor;
 using Serilog;
 using Logic.JsonConverters;
-using Logic.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
