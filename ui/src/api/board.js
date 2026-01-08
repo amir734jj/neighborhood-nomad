@@ -11,3 +11,12 @@ export const queryJourney = (filters) => axios.get('/board/query', {
     return qs.stringify(params);
   },
 });
+
+export const queryJourneyByEmail = (email) => axios.get('/board/query', {
+  params: {
+    filters: [email],
+  },
+  paramsSerializer: params => {
+    return qs.stringify(params);
+  },
+});

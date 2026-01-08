@@ -1,13 +1,14 @@
 import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import {getJourneyById, queryWeather} from "../../../api";
+import {getJourneyById, queryWeather, queryJourneyByEmail} from "../../../api";
 import {pages} from "../../../data";
 import {Badge, Card, Col, Container, Row, Spinner} from "react-bootstrap";
-import {MapMultiple, FetchImage} from "../../common";
+import {MapMultiple, FetchImage, Avatar} from "../../common";
 import {useWindowSize} from "usehooks-ts";
 import {calculateGeographicCenter} from "../../../utilities";
 import {WeatherInfo} from "../../weather";
 import {DateTime} from "luxon";
+import {UserJourneysModal} from "../user-journeys";
 
 export const ViewJourney = () => {
   const {journeyId} = useParams();
@@ -16,6 +17,9 @@ export const ViewJourney = () => {
   const [fetchFailed, setFetchFailed] = useState(null);
   const navigate = useNavigate();
   const [weather, setWeather] = useState(null);
+  const [showUserJourneysModal, setShowUserJourneysModal] = useState(false);
+  const [userJourneys, setUserJourneys] = useState([]);
+  const [loadingUserJourneys, setLoadingUserJourneys] = useState(false);
 
   const fetchData = async (journeyId) => {
     try {
@@ -49,6 +53,25 @@ export const ViewJourney = () => {
     fetchData(journeyId);
   }, [journeyId]);
 
+  const handleAvatarClick = async (email) => {
+    setLoadingUserJourneys(true);
+    setShowUserJourneysModal(true);
+    try {
+      const { data } = await queryJourneyByEmail(email);
+      setUserJourneys(data);
+    } catch (error) {
+      console.error('Failed to fetch user journeys:', error);
+      setUserJourneys([]);
+    } finally {
+      setLoadingUserJourneys(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowUserJourneysModal(false);
+    setUserJourneys([]);
+  };
+
   if (fetchFailed) {
     navigate(pages.root);
     return null;
@@ -77,6 +100,17 @@ export const ViewJourney = () => {
     <Container className="py-4">
       <Row className="mb-4">
         <Col>
+          <div className="d-flex align-items-center gap-3 mb-3">
+            <Avatar
+              text={journey.email}
+              size={50} 
+              onClick={handleAvatarClick}
+            />
+            <div>
+              <small className="text-muted d-block">Shared by</small>
+              <span className="fw-medium">{journey.email}</span>
+            </div>
+          </div>
           <h3>{firstLine}</h3>
           { restLines ? <p>{restLines}</p> : null }
           <div className="d-flex align-items-center gap-3 mt-2">
@@ -140,6 +174,13 @@ export const ViewJourney = () => {
           ))}
         </Col>
       </Row>
+
+      <UserJourneysModal
+        show={showUserJourneysModal}
+        onHide={handleCloseModal}
+        journeys={loadingUserJourneys ? [] : userJourneys}
+        email={journey.email}
+      />
     </Container>
   );
 };

@@ -224,31 +224,37 @@ public class WeatherService(IPersistentCacheService persistentCacheService, IGlo
                 {
                     case "TMAX":
                     {
-                        temperature = value; break;
+                        temperature = value;
+                        break;
                     }
                     case "PRCP":
                     {
-                        precipitationAmount = value; break;
+                        precipitationAmount = value;
+                        break;
                     }
                     case "SNOW":
                     {
-                        snowAmount = value; break;
+                        snowAmount = value;
+                        break;
                     }
 
                     // Weather Types (WT codes)
                     case "WT03":
                     {
-                        isThunder = true; break; // Thunder
+                        isThunder = true;
+                        break; // Thunder
                     }
                     case "WT01": // Fog
                     case "WT02":
                     {
-                        isFog = true; break; // Heavy Fog
+                        isFog = true;
+                        break; // Heavy Fog
                     }
                     case "WT04": // Sleet
                     case "WT05":
                     {
-                        isSleetOrHail = true; break; // Hail
+                        isSleetOrHail = true;
+                        break; // Hail
                     }
                 }
             }

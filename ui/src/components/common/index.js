@@ -29,3 +29,4 @@ export * from './loading-dropdown';
 export * from './use-alert-modal';
 export * from './generic-map-draw';
 export * from './marker-with-info-window';
+export * from './avatar';
