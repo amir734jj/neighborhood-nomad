@@ -6,8 +6,8 @@ import {GoogleIcon} from "../common";
 export const Jumbotron = () => {
   const { publicGlobalConfig } = useGlobalConfig();
 
-  return <Container className="p-5 mb-4 rounded-3">
-    <Container fluid="md" className="py-5">
+  return <Container className="p-5 mb-2 rounded-3">
+    <Container fluid="md" className="pt-1 pb-5">
       <Row>
         <Col sm={12}>
           <h5 className="display-5 fw-bold">
