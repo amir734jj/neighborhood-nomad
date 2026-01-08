@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace Logic.Services;
 
-public class PersistentCacheService(IEfRepository repository, IRecurringJobManager recurringJobManager) : JobBaseAbstract(Cron.Minutely()), IPersistentCacheService
+public class PersistentCacheService(IEfRepository repository) : JobBaseAbstract(Cron.Minutely()), IPersistentCacheService
 {
     private IBasicCrud<PersistentCacheItem> BasicCrud => repository.For<PersistentCacheItem>().SplitQuery();
 
@@ -59,8 +59,13 @@ public class PersistentCacheService(IEfRepository repository, IRecurringJobManag
 
     public override async Task ExecuteAsync()
     {
-        await BasicCrud.Delete([
+        var items = (await BasicCrud.GetAll([
             persistentCacheItem => DateTimeOffset.UtcNow - persistentCacheItem.AccessTime > persistentCacheItem.Expires
-        ]);
+        ])).ToList();
+
+        foreach (var item in items)
+        {
+            await Delete(item.Key);
+        }
     }
 }
