@@ -59,13 +59,8 @@ public class PersistentCacheService(IEfRepository repository) : JobBaseAbstract(
 
     public override async Task ExecuteAsync()
     {
-        var items = (await BasicCrud.GetAll([
+        await BasicCrud.DeleteMany([
             persistentCacheItem => DateTimeOffset.UtcNow - persistentCacheItem.AccessTime > persistentCacheItem.Expires
-        ])).ToList();
-
-        foreach (var item in items)
-        {
-            await Delete(item.Key);
-        }
+        ]);
     }
 }
