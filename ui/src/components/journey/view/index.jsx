@@ -88,8 +88,8 @@ export const ViewJourney = () => {
       <p>{stop.description}</p>
     </div>,
     position: {
-      lat: stop.address.latitude,
-      lng: stop.address.longitude,
+      lat: Number(stop.address.latitude),
+      lng: Number(stop.address.longitude),
     }
   })) || [];
 

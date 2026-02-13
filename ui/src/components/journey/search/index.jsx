@@ -57,8 +57,8 @@ export const SearchJourney = () => {
               </Link>
             </Fragment>,
             position: {
-              lat: s.address.latitude,
-              lng: s.address.longitude,
+              lat: Number(s.address.latitude),
+              lng: Number(s.address.longitude),
             }
           }))))} />
       </Col>
