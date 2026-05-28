@@ -53,9 +53,12 @@ public static class WebApplicationBuilderExtension
                 builder.Services.AddTransient<AmazonS3Client>(x =>
                 {
                     var s3ServiceConfig = x.GetRequiredService<S3ServiceConfig>();
+                    
+                    var endpoint = builder.Configuration.GetValue<string>("SPACES_ENDPOINT") ?? s3ServiceConfig.EndpointUrl;
+                    
                     var config = new AmazonS3Config
                     {
-                        ServiceURL = s3ServiceConfig.EndpointUrl,
+                        ServiceURL = endpoint,
                         RetryMode = RequestRetryMode.Standard   // standard retry when talking to S3 (space service)
                     };
 
