@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /app
 COPY api .
@@ -15,9 +15,12 @@ WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:80
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Timezones
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install --no-install-recommends tzdata curl \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=backend-build /app/out .
 COPY --from=frontend-build /app/dist wwwroot
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl --fail --silent --show-error --max-time 4 http://127.0.0.1:80/ || exit 1
 ENTRYPOINT ["dotnet", "Api.dll"]
