@@ -22,5 +22,5 @@ RUN apt-get update \
 COPY --from=backend-build /app/out .
 COPY --from=frontend-build /app/dist wwwroot
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD curl --fail --silent --show-error --max-time 4 http://127.0.0.1:80/ || exit 1
+    CMD curl --fail --silent --show-error --max-time 4 "http://127.0.0.1:${PORT:-5000}/" || exit 1
 ENTRYPOINT ["dotnet", "Api.dll"]
